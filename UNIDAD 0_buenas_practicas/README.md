@@ -14,3 +14,7 @@ Aplicar estándares de codificación en Python para escribir código limpio, man
 ---
 **Autor:** Karol Josef Aramayo Calle  
 **Registro:** 224026471
+
+
+
+
