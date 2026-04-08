@@ -1,5 +1,4 @@
-# Importamos la clase base y la renombramos temporalmente para evitar choques lógicos
-from clase_polinomio import polinomio as PolinomioBase
+from class_polinomio import polinomio as PolinomioBase
 
 class polinomio(PolinomioBase):
     # ─────────────────────────────────────────
