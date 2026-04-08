@@ -67,6 +67,6 @@ El código fuente presente en este repositorio ha sido desarrollado bajo estrict
 * **Conformidad PEP 8:** El código obedece las convenciones de estilo de Python, incluyendo el uso exclusivo de caracteres ASCII en identificadores (sustitución de la variable `tamaño` por `total` o `longitud`) y la verificación de identidades en memoria mediante el operador `is`.
 
 ---
-**Desarrollado por:** Karol Josef Aramayo Calle  
+**Desarrollado por:** Aramayo Calle Karol Josef
 **Materia:** Estructura de Datos 1  
 **Periodo Académico:** 1/2026
