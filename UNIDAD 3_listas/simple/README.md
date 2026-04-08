@@ -36,5 +36,7 @@ El diseño unidireccional de esta estructura define su eficiencia computacional.
 
 * 
 **Desarrollado por:** Aramayo Calle Karol Josef
+  
 **Materia:** Estructura de Datos 1  
+
 **Semestre:** 1/2026
