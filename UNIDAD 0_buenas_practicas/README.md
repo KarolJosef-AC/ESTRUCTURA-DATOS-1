@@ -12,9 +12,9 @@ Aplicar estándares de codificación en Python para escribir código limpio, man
 | Clases    | PascalCase | `ConjuntoEstatico`       | `conjunto_estatico`   | 
 
 ---
-**Autor:** Karol Josef Aramayo Calle  
-**Registro:** 224026471
-
+**Desarrollado por:** Aramayo Calle Karol Josef
+**Materia:** Estructura de Datos 1  
+**Semestre:** 1/2026
 
 
 

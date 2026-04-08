@@ -53,3 +53,6 @@ Para asegurar la calidad del código, se han seguido las siguientes reglas de in
 * **Validación de Extensionalidad:** El método `agregar()` siempre verifica la preexistencia del dato.
 
 ---
+**Desarrollado por:** Aramayo Calle Karol Josef
+**Materia:** Estructura de Datos 1  
+**Semestre:** 1/2026

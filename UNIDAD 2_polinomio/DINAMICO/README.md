@@ -8,8 +8,6 @@ Concepto POLINOMIO - Lista Enlazada:
 
 Un polinomio representado mediante listas enlazadas es una estructura de datos dinámica donde cada nodo almacena un término del polinomio, compuesto por coeficiente, exponente y un puntero al siguiente término.
 
-Autor: Karol Josef Aramayo Calle
-Resgistro: 224026471
 
 
 # TDA Polinomio: Implementación con Listas Enlazadas 🔗
@@ -42,3 +40,7 @@ Cada entidad en la secuencia topológica contiene:
 ## 💡 Ventaja en Polinomios Dispersos
 Es la estructura de oro para la **Ingeniería de Sistemas**, ya que permite representar polinomios de grados altísimos (ej. $x^{1000000} + 1$) consumiendo únicamente la memoria de dos nodos, eliminando el desperdicio de espacio.
 
+
+**Desarrollado por:** Aramayo Calle Karol Josef
+**Materia:** Estructura de Datos 1  
+**Semestre:** 1/2026
