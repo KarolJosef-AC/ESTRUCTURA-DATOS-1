@@ -9,6 +9,13 @@ class polinomio(PolinomioBase):
         """
         Ejecuta la suma algebraica lineal entre dos modelos polinómicos, agrupando
         y operando los términos que comparten el mismo grado.
+
+        Parametros:
+            otro (polinomio): La segunda estructura matemática a sumar.
+
+        Retorna:
+            polinomio: Una nueva entidad independiente que representa la adición
+                       exacta de ambos sistemas.
         """
         if not isinstance(otro, polinomio):
             raise TypeError("Se esperaba un polinomio.")
@@ -27,6 +34,12 @@ class polinomio(PolinomioBase):
         Calcula la diferencia matemática entre dos polinomios. El proceso consiste
         en sumar al polinomio base el inverso aditivo de cada término del polinomio
         sustraendo.
+
+        Parametros:
+            otro (polinomio): El polinomio que actuará como sustraendo.
+
+        Retorna:
+            polinomio: Una nueva entidad que representa el resultado de la sustracción.
         """
         if not isinstance(otro, polinomio):
             raise TypeError("Se esperaba un polinomio.")
@@ -45,6 +58,12 @@ class polinomio(PolinomioBase):
         Calcula el producto polinómico expandido. Aplica la ley distributiva
         multiplicando cada coeficiente y sumando los exponentes correspondientes,
         según las leyes de los exponentes.
+
+        Parametros:
+            otro (polinomio): El polinomio multiplicador.
+
+        Retorna:
+            polinomio: Una nueva estructura resultante del producto cruzado completo.
         """
         if not isinstance(otro, polinomio):
             raise TypeError("Se esperaba un polinomio.")
@@ -62,6 +81,13 @@ class polinomio(PolinomioBase):
         Aplica el algoritmo clásico de división larga euclidiana para encontrar
         los polinomios cociente y residuo. Garantiza que el grado del residuo sea
         estrictamente inferior al grado del divisor.
+
+        Parametros:
+            otro (polinomio): El modelo matemático que actuará como divisor.
+
+        Retorna:
+            tuple: Una tupla compuesta por dos objetos de la clase polinomio
+                   en el orden (cociente, residuo).
         """
         if otro.esta_vacio():
             raise ZeroDivisionError("No se puede dividir por el polinomio cero.")
@@ -92,6 +118,12 @@ class polinomio(PolinomioBase):
         """
         Sustituye la variable independiente por una magnitud constante dada (x)
         para calcular el valor escalar neto de la expresión.
+
+        Parametros:
+            x (int): El escalar que reemplazará a la variable independiente.
+
+        Retorna:
+            int: La sumatoria de todos los términos evaluados en el punto x.
         """
         if not isinstance(x, int):
             raise TypeError("Solo se permiten valores enteros para x.")
@@ -108,6 +140,12 @@ class polinomio(PolinomioBase):
         Ejecuta la operación de diferenciación sobre la estructura. De acuerdo con
         la regla de la potencia del cálculo diferencial, el exponente de cada término
         multiplica a la base, y el grado del término decrece en una unidad.
+
+        Parametros:
+            Ninguno.
+
+        Retorna:
+            polinomio: El modelo resultante tras aplicar la primera derivada formal.
         """
         resultado = polinomio()
         actual = self.cabeza
