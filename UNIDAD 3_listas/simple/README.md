@@ -33,6 +33,8 @@ El diseño unidireccional de esta estructura define su eficiencia computacional.
 ### ❌ Desventajas
 * **No hay acceso aleatorio:** No puedes pedir directamente el "elemento 5"; debes caminar obligatoriamente desde el 0 hasta el 5.
 * **Sobrecarga de Memoria (Overhead):** Por cada dato guardado, se gasta memoria adicional obligatoria para almacenar la referencia al siguiente nodo.
+
+* 
 **Desarrollado por:** Aramayo Calle Karol Josef
 **Materia:** Estructura de Datos 1  
 **Semestre:** 1/2026
