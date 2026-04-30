@@ -210,17 +210,18 @@ class Vista:
         """Sub-componente: Botones de interacción (Derecha)."""
         botones_frame = ctk.CTkFrame(card, fg_color="transparent")
         botones_frame.grid(row=0, 
-                           column=2, 
-                           padx=8)
+                         column=2, 
+                         padx=8)
 
         if not completada:
             self._crear_boton_icono(botones_frame,
-                                    "✅", "#DCFCE7", "#16A34A",
+                                    "✔", "#DCFCE7", "#16A34A",
                                     lambda: self.cmd_completar(dato))
             
         self._crear_boton_icono(botones_frame,
-                                "🗑️", "#FEE2E2", "#DC2626",
+                                "✖", "#FEE2E2", "#DC2626",
                                 lambda: self.cmd_eliminar(dato))
+        
 
     def _crear_boton_icono(self, contenedor, icono, fondo, texto, comando):
         """Función utilitaria para generar botones de acción consistentes."""
