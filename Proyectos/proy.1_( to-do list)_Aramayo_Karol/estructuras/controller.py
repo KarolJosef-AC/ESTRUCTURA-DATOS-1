@@ -19,14 +19,17 @@ class Controller:
 
         # ── Secuencia de Arranque ──
         self.model.cargar_json()    # Restaura la información almacenada en el sistema de archivos
+        self.categoria_actual = "Todas" # nuevo
         self._conectar_comandos()   # Enlaza las interacciones visuales con los métodos de control
         self._actualizar_vista()    # Proyecta el estado inicial en la pantalla
+        
 
     def _conectar_comandos(self):
         """Asigna las acciones del controlador a los comandos de la Vista."""
         self.vista.cmd_agregar   = self.agregar_tarea
         self.vista.cmd_completar = self.completar_tarea
         self.vista.cmd_eliminar  = self.eliminar_tarea
+        self.vista.cmd_filtrar   = self.filtrar_por_categoria # nuevo
 
     # ── ACCIONES ─────────────────────────────────────────────
 
@@ -52,6 +55,7 @@ class Controller:
             datos["titulo"],
             datos["descripcion"],
             datos["dificultad"],
+            categoria=datos["categoria"] # nuevo
         )
 
         # Fase 4: SINCRONIZACIÓN VISUAL.
@@ -107,9 +111,23 @@ class Controller:
         else:
             self.vista.mostrar_estado(f"❌ {mensaje}")
 
+    def filtrar_por_categoria(self, categoria):
+        """
+         Actualiza el filtro de categoría y refresca la vista.
+        
+        Parámetros:
+            categoria (str): Categoría seleccionada ("Todas", "Personal", etc.)
+        """
+        self.categoria_actual = categoria
+        self.vista.mostrar_estado(f"📂 Mostrando: {categoria}")
+        self._actualizar_vista()
+
     # ── AUXILIAR ─────────────────────────────────────────────
 
     def _actualizar_vista(self):
         """Extrae el estado del modelo y ordena su representación."""
-        tareas = self.model.obtener_todas()
+        if self.categoria_actual == "Todas":
+            tareas = self.model.obtener_todas()
+        else:
+            tareas = self.model.obtener_todas(categoria_filtro=self.categoria_actual)
         self.vista.actualizar_lista(tareas)

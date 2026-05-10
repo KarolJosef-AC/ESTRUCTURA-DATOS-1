@@ -13,10 +13,13 @@ class Nodo:
         descripcion (str): Detalle adicional opcional.
         dificultad (str): Nivel de esfuerzo ("Facil", "Media", "Dificil").
     """
-    def __init__(self, dato, descripcion="", dificultad="Media"):
+    def __init__(self, dato, descripcion="", dificultad="Media", categoria = "Personal"):
         self.dato = dato
         self.descripcion = descripcion
         self.dificultad = dificultad
+        #---agregado - categoria
+        self.categoria = categoria;
+        #----
         self.estado = "pendiente"
         self.siguiente = None
 
@@ -47,7 +50,7 @@ class ListaEnlazada:
         )
 
     # OPERACIONES
-    def agregar_tarea(self, dato, descripcion = "", dificultad = "Media", estado = "pendiente"):
+    def agregar_tarea(self, dato, descripcion = "", dificultad = "Media", estado = "pendiente", categoria = "Personal"):
         """
         Inserta una nueva tarea al final de la lista.
 
@@ -55,7 +58,6 @@ class ListaEnlazada:
         si ya existe una tarea con el mismo título (sin distinción de
         mayúsculas). En caso de éxito, encadena el nuevo nodo al final
         y actualiza el contador.
-
         Parametros:
             dato (str): Título de la tarea. Actúa como identificador único.
             descripcion (str): Información adicional opcional.
@@ -73,7 +75,7 @@ class ListaEnlazada:
         if self._existe_tarea(dato):
             return False, f"La tarea '{dato}' ya existe"
         
-        nuevo_nodo = Nodo(dato, descripcion, dificultad)
+        nuevo_nodo = Nodo(dato, descripcion, dificultad, categoria)
         nuevo_nodo.estado = estado
         # CASO 3: Lista vacia
         if self.cabeza is None:
@@ -157,7 +159,7 @@ class ListaEnlazada:
         # CASO 4: No se encontro el nodo
         return False, f"No se encontró la tarea '{dato}'."
     
-    def obtener_todas(self):
+    def obtener_todas(self, categoria_filtro=None):
         """
         Retorna todas las tareas como lista de diccionarios.
 
@@ -170,12 +172,15 @@ class ListaEnlazada:
         tareas = []
         actual = self.cabeza
         while actual is not None:
-            tareas.append({
-                "dato" :        actual.dato,
-                "descripcion":  actual.descripcion,
-                "dificultad":   actual.dificultad,
-                "estado":       actual.estado,
-            })
+            # AÑADIDO _ CATEGORIA
+            if categoria_filtro is None or categoria_filtro == "Todas" or actual.categoria == categoria_filtro:
+                tareas.append({
+                    "dato" :        actual.dato,
+                    "descripcion":  actual.descripcion,
+                    "dificultad":   actual.dificultad,
+                    "estado":       actual.estado,
+                    "categoria": actual.categoria
+                })
             actual = actual.siguiente
         return tareas
 
@@ -234,7 +239,8 @@ class ListaEnlazada:
                     dato = t["dato"], 
                     descripcion = t.get("descripcion", ""),
                     dificultad = t.get("dificultad", "Media"),
-                    estado = t.get("estado", "pendiente")
+                    estado = t.get("estado", "pendiente"),
+                    categoria=t.get("categoria", "Personal") # nuevo
                 )
         
         except json.JSONDecodeError:

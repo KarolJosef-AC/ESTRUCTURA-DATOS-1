@@ -1,1 +1,30 @@
-[]
+[
+  {
+    "dato": "ED1",
+    "descripcion": "Terminiar el proyecto",
+    "dificultad": "Media",
+    "estado": "pendiente",
+    "categoria": "Universidad"
+  },
+  {
+    "dato": "Investigacion Operativa 1",
+    "descripcion": "Proyecto de Metodo Simplex",
+    "dificultad": "Dificil",
+    "estado": "pendiente",
+    "categoria": "Universidad"
+  },
+  {
+    "dato": "Salir a correr",
+    "descripcion": "",
+    "dificultad": "Facil",
+    "estado": "pendiente",
+    "categoria": "Personal"
+  },
+  {
+    "dato": "Terminiar la pagina web",
+    "descripcion": "",
+    "dificultad": "Dificil",
+    "estado": "pendiente",
+    "categoria": "Trabajo"
+  }
+]

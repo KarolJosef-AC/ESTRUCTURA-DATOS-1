@@ -16,7 +16,12 @@ COLORES = {
     "gris":          "#A89DC0",  # mantenido por compatibilidad
     "oscuro":        "#3D3460",  # mantenido por compatibilidad
 }
-
+# NUEVA CATEGORIA
+COLORA_CATEGORIA = {
+    "Universidad": "#93C5FD",
+    "Trabajo":     "#FDE68A",
+    "Personal":    "#86EFAC",
+}
 COLOR_DIFICULTAD = {
     "Facil":   "#86EFAC",
     "Media":   "#FDE68A",
@@ -39,7 +44,7 @@ class Vista:
 
     # ZONA DE BARRA SUPERIOR ----------------------------------------------------------
     def _barra_superior(self):
-        """Cabecera con identificación y módulo de notificación de estado."""
+        """Cabecera con identificación, filtro de categoria y  módulo de notificación de estado."""
         barra = ctk.CTkFrame(self.root, 
                              fg_color=COLORES["header"],
                              corner_radius=0, 
@@ -49,6 +54,8 @@ class Vista:
 
         self._crear_titulo_app(barra)
         self._crear_etiqueta_estado(barra)
+        self._crear_filtro_categoria(barra) # nuevo
+        
 
     def _crear_titulo_app(self, contenedor_padre):
         """Genera y posiciona el título principal en el lado izquierdo."""
@@ -66,7 +73,17 @@ class Vista:
                                        text_color=COLORES["texto_titulo"])
         self.lbl_estado.pack(side="right", padx=20)
 
-
+    def _crear_filtro_categoria(self, contenedor_padre):
+        """Selector de filtro de categoria."""
+        self.filtro_categoria = ctk.CTkOptionMenu(
+            contenedor_padre,
+            values=["Todas", "Personal", "Universidad", "Trabajo"],
+            height=30,
+            width=120,
+            command=lambda cat: self.cmd_filtrar(cat)
+        )
+        self.filtro_categoria.set("Todas")
+        self.filtro_categoria.pack(side="left",expand=True)
     # ZONA DE TAREAS  ----------------------------------------------------------
     
     def _zona_tareas(self): 
@@ -111,23 +128,38 @@ class Vista:
                                     sticky="ew")
 
     def _crear_controles_accion(self, contenedor):
-        """Fila 1: Selector de categoría y botón de agregar."""
+        """Fila 1: Selector de categoría y dificultad + botón de agregar."""
+        # SELECTOR DE CATEGORIA - columna 0
+        self.selector_categoria = ctk.CTkOptionMenu(contenedor,
+                                                    values = ["Personal",
+                                                                "Universidad",
+                                                                "Trabajo"],
+                                                                height=34)
+        self.selector_categoria.set("Personal")
+        self.selector_categoria.grid(row=1,
+                                     column=0,
+                                     padx=(12, 4),
+                                     pady=(0, 8),
+                                     sticky="ew")
+        
+        # SELECTOR DE DIFICULTAD (columna 1)
         self.selector_dif = ctk.CTkOptionMenu(contenedor,
                                               values=["Facil", "Media", "Dificil"],
                                               height=34)
         self.selector_dif.set("Media")
         self.selector_dif.grid(row=1, 
-                               column=0,
+                               column=1,
                                padx=(12, 4),
                                pady=(0, 8),
                                sticky="ew")
         
+         # BOTÓN AGREGAR (columna 2)
         boton_agregar = ctk.CTkButton(contenedor,
                                       text="➕ Agregar",
                                       height=34,
                                       command=lambda: self.cmd_agregar())
         boton_agregar.grid(row=1,
-                           column=1,
+                           column=2,
                            padx=(4, 12),
                            pady=(0, 8),
                            sticky="ew")
@@ -136,6 +168,7 @@ class Vista:
         """Ajuste de expansión de las columnas."""
         contenedor.grid_columnconfigure(0, weight=1)
         contenedor.grid_columnconfigure(1, weight=1)
+        contenedor.grid_columnconfigure(2, weight=1) # nuevo
 
     # TARJETAS ------------------------------------------------
     def actualizar_lista(self, tareas):
@@ -165,7 +198,8 @@ class Vista:
         """Crea la estructura base de la tarjeta y delega sus componentes internos."""
         completada = tarea["estado"] == "completada"
         color_dif = COLOR_DIFICULTAD.get(tarea["dificultad"], "#ccc")
-        
+        color_cat = COLORA_CATEGORIA.get(tarea["categoria"], "#ccc") # nuevo
+
         card = ctk.CTkFrame(self.contenedor,
                             fg_color=COLORES["tarjeta"],
                             border_color=COLORES["header"],
@@ -175,8 +209,15 @@ class Vista:
         card.grid_columnconfigure(1, weight=1)
 
         self._crear_indicador_dificultad(card, color_dif)
-        self._crear_cuerpo_texto(card, tarea, completada)
-        self._crear_acciones_tarjeta(card, tarea["dato"], completada)
+        self._crear_cuerpo_texto(card, tarea, completada, color_cat)# pasamos color nuevo
+        ctk.CTkLabel(card,
+                 text=f" {tarea['categoria']} ",
+                 font=ctk.CTkFont(size=10),
+                 fg_color=color_cat,
+                 text_color="#1A1A1A",
+                 corner_radius=10).grid(row=0, column=2, padx=10) 
+        
+        self._crear_acciones_tarjeta(card, tarea["dato"], completada) 
 
     def _crear_indicador_dificultad(self, card, color):
         """Sub-componente: Línea vertical de color (Izquierda)."""
@@ -184,7 +225,7 @@ class Vista:
                  bg=color, 
                  width=6).grid(row=0, column=0, sticky="ns")
         
-    def _crear_cuerpo_texto(self, card, tarea, completada):
+    def _crear_cuerpo_texto(self, card, tarea, completada, color_cat):
         """Sub-componente: Título y descripción (Centro)."""
         info_frame = ctk.CTkFrame(card, fg_color="transparent")
         info_frame.grid(row=0, 
@@ -197,20 +238,21 @@ class Vista:
         estilo = "normal" if completada else "bold"
         color_texto = COLORES["texto_desc"] if completada else COLORES["texto_titulo"]
 
+        # titulo arriba
         ctk.CTkLabel(info_frame, text=txt_titulo, anchor="w",
                      font=ctk.CTkFont(size=13, weight=estilo),
-                     text_color=color_texto).pack(fill="x")
-
+                     text_color=color_texto).pack(fill="x", anchor="w")
+        # Descripcion
         if tarea["descripcion"]:
             ctk.CTkLabel(info_frame, text=tarea["descripcion"][:60], anchor="w",
                          font=ctk.CTkFont(size=11),
-                         text_color=COLORES["texto_desc"]).pack(fill="x")
+                         text_color=COLORES["texto_desc"]).pack(fill="x", anchor = "w")
     
     def _crear_acciones_tarjeta(self, card, dato, completada):
         """Sub-componente: Botones de interacción (Derecha)."""
         botones_frame = ctk.CTkFrame(card, fg_color="transparent")
         botones_frame.grid(row=0, 
-                         column=2, 
+                         column=3, 
                          padx=8)
 
         if not completada:
@@ -240,6 +282,7 @@ class Vista:
             "titulo":      self.campo_titulo.get().strip(),
             "descripcion": self.campo_descripcion.get().strip(),
             "dificultad":  self.selector_dif.get(),
+            "categoria":   self.selector_categoria.get(), # nuevo
         }
 
     def limpiar_formulario(self):
@@ -247,6 +290,7 @@ class Vista:
         self.campo_titulo.delete(0, "end")
         self.campo_descripcion.delete(0, "end")
         self.selector_dif.set("Media")
+        self.selector_categoria.set("Personal") # nuevo
 
     def mostrar_estado(self, mensaje):
         """Modifica la cadena de texto del módulo de notificaciones."""
@@ -260,3 +304,4 @@ class Vista:
     def cmd_agregar(self):          pass
     def cmd_completar(self, dato):  pass
     def cmd_eliminar(self, dato):   pass
+    def cmd_filtrar(self, categoria):  pass  # NUEVO
