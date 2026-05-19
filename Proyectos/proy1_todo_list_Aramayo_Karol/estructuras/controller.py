@@ -19,14 +19,18 @@ class Controller:
 
         # ── Secuencia de Arranque ──
         self.model.cargar_json()    # Restaura la información almacenada en el sistema de archivos
+        self.categoria_actual = "Todas" # nuevo
         self._conectar_comandos()   # Enlaza las interacciones visuales con los métodos de control
         self._actualizar_vista()    # Proyecta el estado inicial en la pantalla
+        
 
     def _conectar_comandos(self):
         """Asigna las acciones del controlador a los comandos de la Vista."""
         self.vista.cmd_agregar   = self.agregar_tarea
         self.vista.cmd_completar = self.completar_tarea
         self.vista.cmd_eliminar  = self.eliminar_tarea
+        self.vista.cmd_filtrar   = self.filtrar_por_categoria # nuevo
+        self.vista.cmd_editar    = self.editar_tarea
 
     # ── ACCIONES ─────────────────────────────────────────────
 
@@ -52,6 +56,7 @@ class Controller:
             datos["titulo"],
             datos["descripcion"],
             datos["dificultad"],
+            categoria=datos["categoria"] # nuevo
         )
 
         # Fase 4: SINCRONIZACIÓN VISUAL.
@@ -107,9 +112,53 @@ class Controller:
         else:
             self.vista.mostrar_estado(f"❌ {mensaje}")
 
+    def editar_tarea(self, dato_original):
+        """
+        Solicita al usuario los nuevos valores y actualiza el modelo.
+            
+        Parámetros:
+                dato_original (str): Título actual de la tarea a editar.
+        """
+       # Obtener la descripción actual de la tarea
+        desc_actual = ""
+        actual = self.model.cabeza
+        while actual:
+            if actual.dato.lower() == dato_original.lower():
+                desc_actual = actual.descripcion
+                break
+            actual = actual.siguiente
+
+        nuevos_datos = self.vista.mostrar_dialogo_editar(dato_original, desc_actual)
+        if nuevos_datos is None:
+            return 
+        
+        nuevo_titulo = nuevos_datos["titulo"]
+        nueva_desc = nuevos_datos["descripcion"]
+
+        # Ejecutar la edición en el modelo
+        exito, mensaje = self.model.editar_tarea(dato_original, nuevo_titulo, nueva_desc)
+        if exito:
+            self.model.guardar_json()
+            self._actualizar_vista()
+        self.vista.mostrar_estado(mensaje)
+    
+    def filtrar_por_categoria(self, categoria):
+        """
+         Actualiza el filtro de categoría y refresca la vista.
+        
+        Parámetros:
+            categoria (str): Categoría seleccionada ("Todas", "Personal", etc.)
+        """
+        self.categoria_actual = categoria
+        self.vista.mostrar_estado(f"📂 Mostrando: {categoria}")
+        self._actualizar_vista()
+
     # ── AUXILIAR ─────────────────────────────────────────────
 
     def _actualizar_vista(self):
         """Extrae el estado del modelo y ordena su representación."""
-        tareas = self.model.obtener_todas()
+        if self.categoria_actual == "Todas":
+            tareas = self.model.obtener_todas()
+        else:
+            tareas = self.model.obtener_todas(categoria_filtro=self.categoria_actual)
         self.vista.actualizar_lista(tareas)
