@@ -26,3 +26,9 @@ Implementación de polinomios utilizando diferentes estructuras de almacenamient
 ### 🔹 Unidad 3: Estructuras Lineales
 * **Tarea 3:** [Listas Enlazadas Simples](../UNIDADES/UNIDAD%203_listas/simple)
   > Operaciones de inserción, eliminación y búsqueda.
+
+* **Tarea 4:** [Cola](../UNIDADES/UNIDAD%203_listas/Cola)
+  > Operaciones de encolar, desencolar y ver_frente.
+
+* **Tarea 5:** [Pila](../UNIDADES/UNIDAD%203_listas/Pila/)
+  > Operaciones de apilar, desapilar y ver_cima.
