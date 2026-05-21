@@ -1,21 +1,19 @@
-import tkinter as tk
-from estructuras.model import ListaEnlazada
+import customtkinter as ctk
 from estructuras.view import Vista
 from estructuras.controller import Controller
 
 def main():
-    root = tk.Tk()
+    """Punto de inicialización del patrón Modelo-Vista-Controlador."""
+    # 1. Creación de la instancia base del gestor de ventanas
+    root = ctk.CTk()
     
-    # 1. Crear el Modelo
-    modelo = ListaEnlazada()
-    
-    # 2. Crear la Vista
+    # 2. Inicialización de la capa visual pasando el objeto raíz
     vista = Vista(root)
     
-    # 3. Crear el Controlador uniendo el Modelo y la Vista
-    controlador = Controller(modelo, vista)
+    # 3. Construye el Modelo de forma interna
+    Controller(vista)
     
-    # 4. Iniciar la aplicación
+    # 4. Espera de eventos del sistema o del usuario
     root.mainloop()
 
 if __name__ == "__main__":

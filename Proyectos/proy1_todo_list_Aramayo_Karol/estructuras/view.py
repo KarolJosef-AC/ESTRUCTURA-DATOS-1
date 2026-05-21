@@ -1,140 +1,404 @@
 import tkinter as tk
+import customtkinter as ctk
 from tkinter import messagebox
+
+# CONFIGURACION GLOBAL --------------------------------------------
+ctk.set_appearance_mode("Dark")
+ctk.set_default_color_theme("green")
+
+COLORES = {
+    "fondo":         "#1A1A1A",  # fondo general oscuro, no negro puro
+    "header":        "#2D6A4F",  # verde oscuro para la barra superior
+    "tarjeta":       "#2A2A2A",  # gris oscuro para las tarjetas
+    "texto_titulo":  "#E8F5E9",  # blanco verdoso para títulos
+    "texto_desc":    "#81C784",  # verde claro para descripciones
+    "negro":         "#000000",  # negro puro (formulario inferior)
+    "gris":          "#A89DC0",  # mantenido por compatibilidad
+    "oscuro":        "#3D3460",  # mantenido por compatibilidad
+}
+# NUEVA CATEGORIA
+COLORA_CATEGORIA = {
+    "Universidad": "#93C5FD",
+    "Trabajo":     "#FDE68A",
+    "Personal":    "#86EFAC",
+}
+COLOR_DIFICULTAD = {
+    "Facil":   "#86EFAC",
+    "Media":   "#FDE68A",
+    "Dificil": "#FCA5A5",
+}
 
 class Vista:
     def __init__(self, root):
         self.root = root
-        self.root.title("To-Do List")
-        self.root.geometry("500x650")
+        self.root.title("📝 To-Do List")
+        self.root.geometry("700x600")
         self.root.resizable(False, False)
-        self.root.configure(bg="#F8FAFC")
+
+        self._construir_pantalla()
+
+    def _construir_pantalla(self):
+        self._barra_superior()
+        self._barra_filtros()
+        self._zona_tareas()
+        self._formulario()
+
+    # ZONA DE BARRA SUPERIOR ----------------------------------------------------------
+    def _barra_superior(self):
+        """Cabecera con identificación, filtro de categoria y  módulo de notificación de estado."""
+        barra = ctk.CTkFrame(self.root, 
+                             fg_color=COLORES["header"],
+                             corner_radius=0, 
+                             height=55)
+        barra.pack(fill="x")
+        barra.pack_propagate(False)
+
+        self._crear_titulo_app(barra)
+        self._crear_etiqueta_estado(barra)
+        # self._crear_filtro_categoria(barra) # nuevo
         
-        self.fuente_principal = ("Segoe UI", 11)
-        self.fuente_titulo = ("Segoe UI", 20, "bold")
-        
-        self._construir_interfaz()
 
-    def _construir_interfaz(self):
-        self._construir_encabezado()
-        self._construir_entrada()
-        self._construir_botones()
-        self._construir_lista()
-        self._construir_estado()
+    def _crear_titulo_app(self, contenedor_padre):
+        """Genera y posiciona el título principal en el lado izquierdo."""
+        self.titulo = ctk.CTkLabel(contenedor_padre, 
+                                   text="📝 Mis Tareas",
+                                   font=ctk.CTkFont(size=22, weight="bold"),
+                                   text_color=COLORES["texto_titulo"])
+        self.titulo.pack(side="left", padx=20)
+    
+    def _crear_etiqueta_estado(self, contenedor_padre):
+        """Genera y posiciona el texto dinámico en el lado derecho."""
+        self.lbl_estado = ctk.CTkLabel(contenedor_padre,
+                                       text="Listo.",
+                                       font=ctk.CTkFont(size=15),
+                                       text_color=COLORES["texto_titulo"])
+        self.lbl_estado.pack(side="right", padx=20)
 
-    def _construir_encabezado(self):
-        frame = tk.Frame(self.root, bg="#0F172A", pady=25)
-        frame.pack(fill="x")
+    def _barra_filtros(self):
+        """Barra horizontal con 4 botones de filtro debajo de la cabecera."""
+        barra_filtros = ctk.CTkFrame(self.root,
+                                     fg_color=COLORES["fondo"],
+                                     corner_radius=0)
+        barra_filtros.pack(fill="x", padx=10, pady=(5, 0))
 
-        tk.Label(
-            frame, text="Gestión de Tareas", font=self.fuente_titulo,
-            bg="#0F172A", fg="#F8FAFC"
-        ).pack()
+        categorias = ["Todas", "Personal", "Universidad", "Trabajo"]
+        colores_filtro = {
+            "Todas": "#6B7280",
+            "Personal": "#86EFAC",
+            "Universidad": "#93C5FD",
+            "Trabajo": "#FDE68A", 
+        }
 
-        tk.Label(
-            frame, text="Lista Enlazada Simple", font=("Segoe UI", 10),
-            bg="#0F172A", fg="#94A3B8"
-        ).pack(pady=(5, 0))
+        self.botones_filtro = {}
 
-    def _construir_entrada(self):
-        frame = tk.Frame(self.root, bg="#F8FAFC", pady=15, padx=25)
-        frame.pack(fill="x")
+        for i, cat in enumerate(categorias):
+            color_fondo = colores_filtro[cat]
 
-        self.entrada_tarea = tk.Entry(
-            frame, font=("Segoe UI", 12), bd=0, highlightthickness=1,
-            highlightbackground="#CBD5E1", highlightcolor="#3B82F6",
-            relief="flat"
-        )
-        self.entrada_tarea.pack(pady=10, ipady=8, fill="x")
-        self.entrada_tarea.bind("<Return>", lambda e: self.cmd_agregar())
-
-    def _construir_botones(self):
-        frame = tk.Frame(self.root, bg="#F8FAFC", padx=25)
-        frame.pack(fill="x")
-
-        botones = [
-            ("Agregar", "#10B981", "cmd_agregar"),
-            ("Completar", "#3B82F6", "cmd_completar"),
-            ("Eliminar", "#EF4444", "cmd_eliminar"),
-        ]
-
-        fila = tk.Frame(frame, bg="#F8FAFC")
-        fila.pack(pady=5, fill="x")
-
-        for texto, bg, cmd_nombre in botones:
-            btn = tk.Button(
-                fila, text=texto, bg=bg, fg="white", font=("Segoe UI", 10, "bold"),
-                bd=0, relief="flat", cursor="hand2", activebackground=bg, activeforeground="white",
-                command=lambda c=cmd_nombre: self._ejecutar_comando(c)
+            btn = ctk.CTkButton (
+                barra_filtros,
+                text=cat,
+                fg_color=color_fondo,
+                text_color="#1A1A1A",
+                font = ctk.CTkFont(size=12, weight="bold"),
+                height=28,
+                corner_radius=8,
+                command=lambda c = cat: self._presionar_filtro(c)
             )
-            btn.pack(side="left", expand=True, fill="x", padx=4, ipady=6)
 
-    def _construir_lista(self):
-        frame = tk.Frame(self.root, bg="#F8FAFC", padx=25, pady=15)
-        frame.pack(fill="both", expand=True)
+            btn.pack(side="left", padx=3, pady=4, fill="x", expand=True)
+            self.botones_filtro[cat] = btn
 
-        contenedor = tk.Frame(frame, bg="white", bd=0, highlightthickness=1, highlightbackground="#CBD5E1")
-        contenedor.pack(fill="both", expand=True)
+        self._resaltar_filtro_activo("Todas")
 
-        scrollbar = tk.Scrollbar(contenedor, bd=0, relief="flat")
-        scrollbar.pack(side="right", fill="y")
+    def _presionar_filtro(self, categoria):
+        """Notifica al controlador y resalta el botón activo."""
+        self._resaltar_filtro_activo(categoria)
+        self.cmd_filtrar(categoria)
 
-        self.listbox = tk.Listbox(
-            contenedor, font=("Segoe UI", 11), selectbackground="#EFF6FF", selectforeground="#1E293B",
-            yscrollcommand=scrollbar.set, bd=0, relief="flat", highlightthickness=0, activestyle="none"
-        )
-        self.listbox.pack(side="left", fill="both", expand=True, padx=10, pady=10)
-        scrollbar.config(command=self.listbox.yview)
-
-    def _construir_estado(self):
-        self.lbl_estado = tk.Label(
-            self.root, text="  Sistema listo.", font=("Segoe UI", 9),
-            bg="#E2E8F0", fg="#475569", anchor="w", pady=6, padx=10
-        )
-        self.lbl_estado.pack(fill="x", side="bottom")
-
-    def obtener_texto_entrada(self):
-        return self.entrada_tarea.get().strip()
-
-    def limpiar_entrada(self):
-        self.entrada_tarea.delete(0, tk.END)
-
-    def actualizar_lista(self, tareas):
-        self.listbox.delete(0, tk.END)
-        for tarea in tareas:
-            if tarea["estado"] == "completada":
-                self.listbox.insert(tk.END, f"  ✓  {tarea['dato']}")
+    def _resaltar_filtro_activo(self, categria_activa):
+        """Aplica borde al botón activo y quita borde a los demás."""
+        for cat, btn in self.botones_filtro.items():
+            if cat == categria_activa:
+                btn.configure(border_width = 2, border_color="#FFFFFF")
             else:
-                self.listbox.insert(tk.END, f"  ○  {tarea['dato']}")
+                btn.configure(border_width = 0)
+    # ZONA DE TAREAS  ----------------------------------------------------------
+    
+    def _zona_tareas(self): 
+        """Contenedor general de todas las tareas"""
+        self.contenedor = ctk.CTkScrollableFrame(self.root,
+                                                 fg_color=COLORES["fondo"],
+                                                 scrollbar_button_color=COLORES["header"],
+                                                 corner_radius=0)
+        self.contenedor.pack(fill="both",
+                             expand=True,
+                             padx=10,
+                             pady=8)
         
-        for i, tarea in enumerate(tareas):
-            if tarea["estado"] == "completada":
-                self.listbox.itemconfig(i, fg="#94A3B8")
-            else:
-                self.listbox.itemconfig(i, fg="#1E293B")
+    def _formulario(self):
+        """Crea la base y delega la construcción interna."""
+        form = ctk.CTkFrame(self.root,
+                            fg_color=COLORES["negro"],
+                            corner_radius=10)
+        form.pack(fill="x", padx=10, pady=(0, 10))
+        self._crear_inputs_principales(form)
+        self._crear_controles_accion(form)
+        self._configurar_grid_formulario(form)
 
-    def obtener_seleccion(self):
-        indices = self.listbox.curselection()
-        if not indices:
-            return None
-        texto_completo = self.listbox.get(indices[0])
-        return texto_completo.replace("  ✓  ", "").replace("  ○  ", "").strip()
+    def _crear_inputs_principales(self, contenedor):
+        """Fila 0: Captura de Título y Descripción."""
+        self.campo_titulo = ctk.CTkEntry(contenedor,
+                                         placeholder_text="Titulo *",
+                                         height=34)
+        self.campo_titulo.grid(row=0,
+                               column=0,
+                               padx=(12, 4),
+                               pady=8,
+                               sticky="ew")
+        
+        self.campo_descripcion = ctk.CTkEntry(contenedor,
+                                              placeholder_text="Descripcion",
+                                              height=34)
+        self.campo_descripcion.grid(row=0,
+                                    column=1,
+                                    padx=(4, 12),
+                                    pady=8,
+                                    sticky="ew")
 
-    def mostrar_mensaje(self, titulo, mensaje, tipo="info"):
-        if tipo == "error":
-            messagebox.showerror(titulo, mensaje)
-        elif tipo == "advertencia":
-            messagebox.showwarning(titulo, mensaje)
+    def _crear_controles_accion(self, contenedor):
+        """Fila 1: Selector de categoría y dificultad + botón de agregar."""
+        # SELECTOR DE CATEGORIA - columna 0
+        self.selector_categoria = ctk.CTkOptionMenu(contenedor,
+                                                    values = ["Personal",
+                                                                "Universidad",
+                                                                "Trabajo"],
+                                                                height=34)
+        self.selector_categoria.set("Personal")
+        self.selector_categoria.grid(row=1,
+                                     column=0,
+                                     padx=(12, 4),
+                                     pady=(0, 8),
+                                     sticky="ew")
+        
+        # SELECTOR DE DIFICULTAD (columna 1)
+        self.selector_dif = ctk.CTkOptionMenu(contenedor,
+                                              values=["Facil", "Media", "Dificil"],
+                                              height=34)
+        self.selector_dif.set("Media")
+        self.selector_dif.grid(row=1, 
+                               column=1,
+                               padx=(12, 4),
+                               pady=(0, 8),
+                               sticky="ew")
+        
+         # BOTÓN AGREGAR (columna 2)
+        boton_agregar = ctk.CTkButton(contenedor,
+                                      text="➕ Agregar",
+                                      height=34,
+                                      command=lambda: self.cmd_agregar())
+        boton_agregar.grid(row=1,
+                           column=2,
+                           padx=(4, 12),
+                           pady=(0, 8),
+                           sticky="ew")
+
+    def _configurar_grid_formulario(self, contenedor):
+        """Ajuste de expansión de las columnas."""
+        contenedor.grid_columnconfigure(0, weight=1)
+        contenedor.grid_columnconfigure(1, weight=1)
+        contenedor.grid_columnconfigure(2, weight=1) # nuevo
+
+    # TARJETAS ------------------------------------------------
+    def actualizar_lista(self, tareas):
+        """Actualizador del contenedor de tareas."""
+        self._limpiar_contenedor()
+        if not tareas:
+            self._dibujar_estado_vacio()
         else:
-            messagebox.showinfo(titulo, mensaje)
+            for tarea in tareas:
+                self._tarjeta(tarea)
+
+    def _limpiar_contenedor(self):
+        """Elimina todos los widgets del contenedor de scroll."""
+        for widget in self.contenedor.winfo_children():
+            widget.destroy()
+
+    def _dibujar_estado_vacio(self):
+        """Mensaje cuando la lista de la estructura está vacía."""
+        ctk.CTkLabel(
+            self.contenedor,
+            text="¡No hay tareas! 🎉",
+            font=ctk.CTkFont(size=18),
+            text_color=COLORES["texto_desc"]
+        ).pack(pady=30)
+
+    def _tarjeta(self, tarea):
+        """Crea la estructura base de la tarjeta y delega sus componentes internos."""
+        completada = tarea["estado"] == "completada"
+        color_dif = COLOR_DIFICULTAD.get(tarea["dificultad"], "#ccc")
+        color_cat = COLORA_CATEGORIA.get(tarea["categoria"], "#ccc") # nuevo
+
+        card = ctk.CTkFrame(self.contenedor,
+                            fg_color=COLORES["tarjeta"],
+                            border_color=COLORES["header"],
+                            border_width=1,
+                            corner_radius=8)
+        card.pack(fill="x", pady=2)
+        card.grid_columnconfigure(1, weight=1)
+
+        self._crear_indicador_dificultad(card, color_dif)
+        self._crear_cuerpo_texto(card, tarea, completada, color_cat)# pasamos color nuevo
+        ctk.CTkLabel(card,
+                 text=f" {tarea['categoria']} ",
+                 font=ctk.CTkFont(size=10),
+                 fg_color=color_cat,
+                 text_color="#1A1A1A",
+                 corner_radius=10).grid(row=0, column=2, padx=10) 
+        
+        self._crear_acciones_tarjeta(card, tarea["dato"], completada) 
+
+    def _crear_indicador_dificultad(self, card, color):
+        """Sub-componente: Línea vertical de color (Izquierda)."""
+        tk.Frame(card, 
+                 bg=color, 
+                 width=6).grid(row=0, column=0, sticky="ns")
+        
+    def _crear_cuerpo_texto(self, card, tarea, completada, color_cat):
+        """Sub-componente: Título y descripción (Centro)."""
+        info_frame = ctk.CTkFrame(card, fg_color="transparent")
+        info_frame.grid(row=0, 
+                        column=1, 
+                        sticky="ew", 
+                        padx=10, 
+                        pady=6)
+
+        txt_titulo = f"✅ {tarea['dato']}" if completada else tarea["dato"]
+        estilo = "normal" if completada else "bold"
+        color_texto = COLORES["texto_desc"] if completada else COLORES["texto_titulo"]
+
+        # titulo arriba
+        ctk.CTkLabel(info_frame, text=txt_titulo, anchor="w",
+                     font=ctk.CTkFont(size=13, weight=estilo),
+                     text_color=color_texto).pack(fill="x", anchor="w")
+        # Descripcion
+        if tarea["descripcion"]:
+            ctk.CTkLabel(info_frame, text=tarea["descripcion"][:60], anchor="w",
+                         font=ctk.CTkFont(size=11),
+                         text_color=COLORES["texto_desc"]).pack(fill="x", anchor = "w")
+    
+    def _crear_acciones_tarjeta(self, card, dato, completada):
+        """Sub-componente: Botones de interacción (Derecha)."""
+        botones_frame = ctk.CTkFrame(card, fg_color="transparent")
+        botones_frame.grid(row=0, column=3, padx=4)
+
+        # Botón toggle (completar / descompletar)
+        if completada:
+            icono_toggle = "↩"
+            fondo_toggle = "#FEF3C7"
+            texto_toggle = "#D97706"
+        else:
+            icono_toggle = "✔"
+            fondo_toggle = "#DCFCE7"
+            texto_toggle = "#16A34A"
+        self._crear_boton_icono(botones_frame,
+                                icono_toggle, fondo_toggle, texto_toggle,
+                                lambda: self.cmd_completar(dato))
+
+        # Botón editar (siempre visible)
+        self._crear_boton_icono(botones_frame,
+                                "✎", "#E0E7FF", "#4F46E5",
+                                lambda: self.cmd_editar(dato))
+
+        # Botón eliminar (siempre visible)
+        self._crear_boton_icono(botones_frame,
+                                "✖", "#FEE2E2", "#DC2626",
+                                lambda: self.cmd_eliminar(dato))
+        
+
+    def _crear_boton_icono(self, contenedor, icono, fondo, texto, comando):
+        """Función utilitaria para generar botones de acción consistentes."""
+        ctk.CTkButton(contenedor, text=icono,
+                      width=34, height=34,
+                      fg_color=fondo, 
+                      text_color=texto,
+                      command=comando).pack(side="left", padx=2)
+        
+
+    # ── Interfaces de lectura/escritura para el Controlador ──────────────────
+
+    def obtener_datos_formulario(self):
+        """Extrae el texto plano de los componentes de entrada."""
+        return {
+            "titulo":      self.campo_titulo.get().strip(),
+            "descripcion": self.campo_descripcion.get().strip(),
+            "dificultad":  self.selector_dif.get(),
+            "categoria":   self.selector_categoria.get(), # nuevo
+        }
+
+    def limpiar_formulario(self):
+        """Restablece los componentes de entrada a su estado neutro."""
+        self.campo_titulo.delete(0, "end")
+        self.campo_descripcion.delete(0, "end")
+        self.selector_dif.set("Media")
+        self.selector_categoria.set("Personal") # nuevo
+
+    def mostrar_dialogo_editar(self, titulo_original, descripcion_actual=""):
+        dialogo = ctk.CTkToplevel(self.root)
+        dialogo.title("Editar tarea")
+        dialogo.geometry("400x200")
+        dialogo.resizable(False, False)
+        dialogo.grab_set()
+
+        frame = ctk.CTkFrame(dialogo, fg_color=COLORES["negro"])
+        frame.pack(fill="both", expand=True, padx=15, pady=15)
+
+        ctk.CTkLabel(frame, text="Nuevo título:", text_color=COLORES["texto_titulo"]).pack(anchor="w")
+        entry_titulo = ctk.CTkEntry(frame, placeholder_text="Título")
+        entry_titulo.pack(fill="x", pady=(2, 8))
+        entry_titulo.insert(0, titulo_original)
+
+        ctk.CTkLabel(frame, text="Nueva descripción:", text_color=COLORES["texto_titulo"]).pack(anchor="w")
+        entry_desc = ctk.CTkEntry(frame, placeholder_text="Descripción")
+        entry_desc.pack(fill="x", pady=(2, 10))
+        entry_desc.insert(0, descripcion_actual)
+
+        resultado = {"titulo": None, "descripcion": None}
+
+        def aceptar():
+            nuevo_titulo = entry_titulo.get().strip()
+            nueva_desc = entry_desc.get().strip()
+            if nuevo_titulo:
+                resultado["titulo"] = nuevo_titulo
+                resultado["descripcion"] = nueva_desc
+                dialogo.destroy()
+            else:
+                messagebox.showwarning("Campo requerido", "El título no puede estar vacío.", parent=dialogo)
+
+        def cancelar():
+            dialogo.destroy()
+
+        botones_frame = ctk.CTkFrame(frame, fg_color="transparent")
+        botones_frame.pack(pady=(10,0))
+        ctk.CTkButton(botones_frame, text="Cancelar", fg_color="#FEE2E2", text_color="#DC2626",
+                    command=cancelar).pack(side="left", padx=5)
+        ctk.CTkButton(botones_frame, text="Aceptar", command=aceptar).pack(side="left", padx=5)
+
+        dialogo.wait_window()
+        if resultado["titulo"] is None:
+            return None
+        return resultado
 
     def mostrar_estado(self, mensaje):
-        self.lbl_estado.config(text=f"  {mensaje}")
+        """Modifica la cadena de texto del módulo de notificaciones."""
+        self.lbl_estado.configure(text=mensaje)
 
-    def _ejecutar_comando(self, nombre):
-        metodo = getattr(self, nombre, None)
-        if metodo:
-            metodo()
+    def mostrar_confirmacion(self, titulo, mensaje):
+        """Invoca un cuadro de diálogo del sistema para validación booleana."""
+        return messagebox.askyesno(titulo, mensaje)
 
-    def cmd_agregar(self):   pass
-    def cmd_completar(self): pass
-    def cmd_eliminar(self):  pass
+    # Definición de firmas huecas (para ser sobreescritas por el Controlador)
+    def cmd_agregar(self):          pass
+    def cmd_completar(self, dato):  pass
+    def cmd_eliminar(self, dato):   pass
+    def cmd_filtrar(self, categoria):  pass  # NUEVO
+    def cmd_editar(self, dato): pass
