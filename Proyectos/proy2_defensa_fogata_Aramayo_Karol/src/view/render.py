@@ -1,7 +1,7 @@
 """
 Vista del juego. Solo dibuja, no piensa.
 
-Fase: 2 - Grid y fogata.
+Fase: 2 - ENEMIGOS
 """
 
 import pygame
@@ -16,6 +16,9 @@ COLOR_BRASA = (255, 200, 50)
 COLOR_BORDE = (255, 140, 0)
 ROJO = (200, 0, 0)
 VERDE = (0, 200, 0)
+# FASE 3 - ENEMIGOS
+ENEMIGO_COLOR = (180, 40, 40)
+#
 
 
 class Render:
@@ -24,10 +27,13 @@ class Render:
     def __init__(self) -> None:
         pass
 
-    def dibujar(self, pantalla: pygame.Surface, mapa: Mapa, fogata: Fogata) -> None:
+    def dibujar(self, pantalla: pygame.Surface, mapa: Mapa, fogata: Fogata, enemigos:list) -> None:
         pantalla.fill(FONDO)
         self._grilla(pantalla, mapa)
         self._fogata(pantalla, fogata)
+        # FASE 3 - ENEMIGO - llamado(enemigos)
+        self._enemigos(pantalla, enemigos)
+        #
 
     def _grilla(self, pantalla: pygame.Surface, mapa: Mapa) -> None:
         for fila in range(mapa.filas):
@@ -63,3 +69,23 @@ class Render:
         pygame.draw.rect(pantalla, ROJO, (bx, by, bw, bh))
         vida_ancho = int(bw * fogata.porcentaje_vida())
         pygame.draw.rect(pantalla, VERDE, (bx, by, vida_ancho, bh))
+
+    # FASE 3 - ENEMIGOS
+    def _enemigos(self, pantalla: pygame.Surface, enemigos:list) -> None:
+        """Dibuja cada enemigo y su barra de vida."""
+        for enemigo in enemigos:
+            x = enemigo.col * TAM_CELDA
+            y = int(enemigo.y)
+            w = TAM_CELDA
+            h = TAM_CELDA
+            rect = pygame.Rect(x, y, w, h)
+            pygame.draw.rect(pantalla, ENEMIGO_COLOR, rect)
+
+            # barra de vida
+            bx = x
+            by = y - 6
+            bw = w
+            bh = 4
+            pygame.draw.rect(pantalla, ROJO, (bx, by, bw, bh))
+            vida_w = int(bw * enemigo.porcentaje_vida())
+            pygame.draw.rect(pantalla, VERDE, (bx, by, vida_w, bh))
