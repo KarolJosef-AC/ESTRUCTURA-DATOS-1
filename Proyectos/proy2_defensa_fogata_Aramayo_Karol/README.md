@@ -34,18 +34,20 @@ de datos, POO y arquitectura MVC en un entorno interactivo.
 - Barra de vida sobre la fogata
 - Archivos: `mapa.py`, `fogata.py`
 
-### 🔄 Fase 3 — Enemigos *(en desarrollo)*
+### ✅ Fase 3 — Enemigos
 - Clase Enemigo con vida y velocidad
 - Movimiento desde la parte superior hacia la fogata
 - Daño a la fogata al llegar
 - Renderizado de enemigos con barra de vida
 
-### ⬜ Fase 4 — Estructuras de Datos
-- Implementación manual de Cola (FIFO)
-- Implementación manual de Lista Enlazada
+### ✅ Fase 4 — Estructuras de Datos
+- Implementación manual de Cola (FIFO) en `cola.py`
+- Implementación manual de Lista Enlazada en `lista_enlazada.py`
 - Oleadas de enemigos gestionadas con cola
+- Enemigos activos almacenados en lista enlazada
+- Archivos: `cola.py`, `lista_enlazada.py`
 
-### ⬜ Fase 5 — Construcciones Defensivas
+### ⬜ Fase 5 — Construcciones Defensivas *(en desarrollo)*
 - Colocación de defensas con click del mouse
 - Tipos: valla, torre, muro reforzado
 - Validación de posición en el grid
