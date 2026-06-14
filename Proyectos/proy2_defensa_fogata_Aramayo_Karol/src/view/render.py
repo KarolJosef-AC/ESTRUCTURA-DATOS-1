@@ -27,13 +27,17 @@ class Render:
     def __init__(self) -> None:
         pass
 
-    def dibujar(self, pantalla: pygame.Surface, mapa: Mapa, fogata: Fogata, enemigos:list) -> None:
+    def dibujar(self, pantalla: pygame.Surface, mapa: Mapa, fogata: Fogata, enemigos:list, defensas: list) -> None:
+       
         pantalla.fill(FONDO)
         self._grilla(pantalla, mapa)
         self._fogata(pantalla, fogata)
         # FASE 3 - ENEMIGO - llamado(enemigos)
         self._enemigos(pantalla, enemigos)
         #
+        # FASE 5 - dibujar defensas
+        self._defensas(pantalla, defensas)
+        # fin
 
     def _grilla(self, pantalla: pygame.Surface, mapa: Mapa) -> None:
         for fila in range(mapa.filas):
@@ -89,3 +93,13 @@ class Render:
             pygame.draw.rect(pantalla, ROJO, (bx, by, bw, bh))
             vida_w = int(bw * enemigo.porcentaje_vida())
             pygame.draw.rect(pantalla, VERDE, (bx, by, vida_w, bh))
+    
+    def _defensas(self, pantalla:pygame.surface, defensas:list) -> None:
+        """Dibuja cada defensa en su celda"""
+
+        for d in defensas:
+            x = d.col * TAM_CELDA
+            y = d.fila * TAM_CELDA
+            rect = pygame.Rect(x, y, TAM_CELDA, TAM_CELDA)
+            pygame.draw.rect(pantalla, d.color, rect)
+            pygame.draw.rect(pantalla, (0, 0, 0), rect, 2)
