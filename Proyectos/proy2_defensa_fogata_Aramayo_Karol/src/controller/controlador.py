@@ -15,6 +15,7 @@ from model.entidades.enemigo import Enemigo
 from model.estructuras.cola import Cola
 from model.estructuras.lista_enlazada import ListaEnlazada
 from model.entidades.defensa import Defensa
+from model.entidades.proyectil import Proyectil # FASE 6
 
 ANCHO = 800
 ALTO = 600
@@ -42,6 +43,11 @@ class Controlador:
         # FASE 5 - lista defensas y tipo
         self.defensas = []
         self.tipo_defensa = "valla"
+
+        # FASE 6 - lista de proyectiles y tiempo
+        self.proyectiles = []
+        self.tiempo_juego = 0.0
+        # fin
 
         # Fase 4 - llenar enemigos en la cola
         for _ in range(10):
@@ -93,6 +99,36 @@ class Controlador:
                 self.fogata.recibir_dano(10)
                 self.activos.eliminar(enemigo)
 
+        # Fase 6 - tiempo de juego 
+        self.tiempo_juego += dt
+
+        for defensa in self.defensas:
+            if defensa.tipo in ("torre",) and defensa.puede_disparar(self.tiempo_juego):
+                # buscar mejor enemigo
+                mejor_enemigo = None
+                mejor_distancia = 200
+
+                for enemigo in self.activos.recorrer():
+                    dx = enemigo.x - defensa.col * 40
+                    dy = enemigo.y - defensa.fila * 40
+                    dist = (dx ** 2 + dy ** 2) ** 0.5
+                    if dist < mejor_distancia:
+                        mejor_distancia = dist
+                        mejor_enemigo = enemigo
+
+                if mejor_enemigo:
+                    p = Proyectil(defensa.col, defensa.fila, mejor_enemigo)
+                    self.proyectiles.append(p)
+        
+        for p in self.proyectiles[:]:
+            p.mover(dt)
+            if not p.activo or p.fuera_de_pantalla():
+                self.proyectiles.remove(p)
+
+        for enemigo in self.activos.recorrer():
+            if not enemigo.esta_vivo():
+                self.activos.eliminar(enemigo)
+
     def iniciar(self) -> None:
         self.run = True
         while self.run:
@@ -104,7 +140,8 @@ class Controlador:
                 self.mapa,
                 self.fogata,
                 self.activos.recorrer(),
-                self.defensas
+                self.defensas,
+                self.proyectiles
             )
 
             pygame.display.flip()

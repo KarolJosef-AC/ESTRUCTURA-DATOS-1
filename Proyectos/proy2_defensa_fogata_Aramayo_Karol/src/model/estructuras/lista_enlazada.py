@@ -32,21 +32,25 @@ class ListaEnlazada:
         self._tamano += 1
 
     def eliminar(self, dato):
-        """ Elimina el primer nodo que contenga el dato. True si lo encuentra"""
+        """Elimina el primer nodo que contenga el dato. True si lo encontró."""
         if self.cabeza is None:
             return False
-        
+
+        # Si es la cabeza
         if self.cabeza.dato == dato:
             self.cabeza = self.cabeza.siguiente
             self._tamano -= 1
             return True
-        
+
+        # Buscar en el resto
         actual = self.cabeza
         while actual.siguiente is not None:
             if actual.siguiente.dato == dato:
                 actual.siguiente = actual.siguiente.siguiente
                 self._tamano -= 1
+                return True
             actual = actual.siguiente
+
         return False
     
     def recorrer(self):

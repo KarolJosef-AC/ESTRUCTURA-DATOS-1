@@ -27,7 +27,7 @@ class Render:
     def __init__(self) -> None:
         pass
 
-    def dibujar(self, pantalla: pygame.Surface, mapa: Mapa, fogata: Fogata, enemigos:list, defensas: list) -> None:
+    def dibujar(self, pantalla: pygame.Surface, mapa: Mapa, fogata: Fogata, enemigos:list, defensas: list, proyectiles) -> None:
        
         pantalla.fill(FONDO)
         self._grilla(pantalla, mapa)
@@ -38,7 +38,8 @@ class Render:
         # FASE 5 - dibujar defensas
         self._defensas(pantalla, defensas)
         # fin
-
+        # FASE 6 - 
+        self._proyectiles(pantalla, proyectiles)
     def _grilla(self, pantalla: pygame.Surface, mapa: Mapa) -> None:
         for fila in range(mapa.filas):
             for col in range(mapa.columnas):
@@ -103,3 +104,10 @@ class Render:
             rect = pygame.Rect(x, y, TAM_CELDA, TAM_CELDA)
             pygame.draw.rect(pantalla, d.color, rect)
             pygame.draw.rect(pantalla, (0, 0, 0), rect, 2)
+
+    # FASE 6 - DIBUJAR PROYEC
+    def _proyectiles(self, pantalla, proyectiles):
+        """ Dibuja cada proyectil como un punto amarillo."""
+        for p in proyectiles:
+            pygame.draw.circle(pantalla, (255, 255, 0), (int(p.x), int(p.y)), 4)
+    # FIN

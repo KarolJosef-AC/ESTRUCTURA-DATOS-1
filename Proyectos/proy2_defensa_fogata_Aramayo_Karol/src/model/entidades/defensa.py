@@ -31,6 +31,22 @@ class Defensa:
             self.color = (80, 80, 80)
         self.vida_max = self.vida
 
+    # FASE 6 - Metodo para disparar
+    def puede_disparar(self, tiempo_actual: float) -> bool:
+        """ True si paso suficiente tiempo desde el ultimo disparo"""
+        if not hasattr(self, '_ultimo disparo'):
+            self._ultimo_disparo = 0.0
+
+        intervalo = 1.0
+        if self.tipo == "torre":
+            intervalo = 0.8
+
+        if tiempo_actual - self._ultimo_disparo >= intervalo:
+            self._ultimo_disparo = tiempo_actual
+            return True
+        return False
+    ## FIN FASE 6
+    
     def colocar_en_mapa(self, mapa) -> None:
         """Marca la celda como obstaculo en el mapa."""
         mapa.poner = (self.col, self.fila,CELDA_OBSTACULO)
