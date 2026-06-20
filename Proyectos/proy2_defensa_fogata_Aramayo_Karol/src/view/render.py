@@ -84,7 +84,7 @@ class Render:
             w = TAM_CELDA
             h = TAM_CELDA
             rect = pygame.Rect(x, y, w, h)
-            pygame.draw.rect(pantalla, ENEMIGO_COLOR, rect)
+            pygame.draw.rect(pantalla, enemigo.color, rect)
             bx = x
             by = y - 6
             bw = w

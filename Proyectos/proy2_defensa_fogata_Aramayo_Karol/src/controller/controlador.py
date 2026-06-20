@@ -64,7 +64,7 @@ class Controlador:
         # Fase 4 - llenar cola
         for _ in range(10):
             col = random.randint(0, self.mapa.columnas - 1)
-            self.cola_oleadas.encolar(Enemigo(col=col, fila=0))
+            self.cola_oleadas.encolar(Enemigo(col=col, fila=0, tipo='normal'))
 
         self.run = False
 
@@ -84,7 +84,7 @@ class Controlador:
 
         for _ in range(10):
             col = random.randint(0, self.mapa.columnas - 1)
-            self.cola_oleadas.encolar(Enemigo(col=col, fila=0))
+            self.cola_oleadas.encolar(Enemigo(col=col, fila=0, tipo="normal"))
 
     def eventos(self) -> None:
         for e in pygame.event.get():
@@ -141,6 +141,10 @@ class Controlador:
             if not self.cola_oleadas.vacia():
                 enemigo = self.cola_oleadas.desencolar()
                 self.activos.insertar(enemigo)
+            else: 
+                col = random.randint(0, self.mapa.columnas - 1)
+                tipo = random.choice(["normal", "normal", "tanque"])
+                self.activos.insertar(Enemigo(col = col, fila = 0, tipo=tipo))
 
         for enemigo in self.activos.recorrer():
             llego = enemigo.mover(dt, self.mapa)
@@ -195,7 +199,8 @@ class Controlador:
             else:
                 for _ in range(10 + self.oleada * 2):
                     col = random.randint(0, self.mapa.columnas - 1)
-                    self.cola_oleadas.encolar(Enemigo(col=col, fila=0))
+                    tipo = random.choice(["normal", "normal", "tanque"])
+                    self.cola_oleadas.encolar(Enemigo(col=col, fila=0, tipo=tipo))
 
     def iniciar(self) -> None:
         self.run = True
