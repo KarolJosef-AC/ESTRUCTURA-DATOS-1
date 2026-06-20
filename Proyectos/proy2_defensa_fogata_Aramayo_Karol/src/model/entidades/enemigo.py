@@ -36,6 +36,10 @@ class Enemigo:
                 self.y = self.fila * TAM_CELDA
                 return True
 
+            # Verificar si la celda de abajo esta bloqueada
+            if not mapa.libre(self.col, nueva_fila):
+                return False  # No avanza, se queda en su lugar
+
             self.fila = nueva_fila
             self.y = self.fila * TAM_CELDA
 

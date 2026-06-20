@@ -26,20 +26,21 @@ class Render:
 
     def __init__(self) -> None:
         pass
-
-    def dibujar(self, pantalla: pygame.Surface, mapa: Mapa, fogata: Fogata, enemigos:list, defensas: list, proyectiles) -> None:
-       
+## FASE 7 - Nuevos parámetros de UI
+    def dibujar(self, pantalla, mapa, fogata, enemigos, defensas, proyectiles,
+                oleada, puntuacion, juego_terminado, victoria, fuente, fuente_grande):
+    ## FIN FASE 7
         pantalla.fill(FONDO)
         self._grilla(pantalla, mapa)
         self._fogata(pantalla, fogata)
-        # FASE 3 - ENEMIGO - llamado(enemigos)
         self._enemigos(pantalla, enemigos)
-        #
-        # FASE 5 - dibujar defensas
         self._defensas(pantalla, defensas)
-        # fin
-        # FASE 6 - 
         self._proyectiles(pantalla, proyectiles)
+        ## FASE 7 - Dibujar UI y pantalla final
+        self._ui(pantalla, oleada, puntuacion, fuente)
+        if juego_terminado:
+            self._pantalla_final(pantalla, victoria, fuente_grande)
+        ## FIN FASE 7
     def _grilla(self, pantalla: pygame.Surface, mapa: Mapa) -> None:
         for fila in range(mapa.filas):
             for col in range(mapa.columnas):
@@ -111,3 +112,34 @@ class Render:
         for p in proyectiles:
             pygame.draw.circle(pantalla, (255, 255, 0), (int(p.x), int(p.y)), 4)
     # FIN
+
+
+    ## FASE 7 - Interfaz de usuario
+    def _ui(self, pantalla, oleada, puntuacion, fuente):
+        """Muestra oleada y puntuacion en la parte superior."""
+        texto_oleada = fuente.render(f"Oleada: {oleada}", True, (255, 255, 255))
+        texto_puntos = fuente.render(f"Puntos: {puntuacion}", True, (255, 255, 255))
+        pantalla.blit(texto_oleada, (10, 5))
+        pantalla.blit(texto_puntos, (10, 30))
+
+    def _pantalla_final(self, pantalla, victoria, fuente_grande):
+        """Muestra pantalla de victoria o derrota."""
+        # Fondo semitransparente
+        overlay = pygame.Surface((800, 600))
+        overlay.set_alpha(180)
+        overlay.fill((0, 0, 0))
+        pantalla.blit(overlay, (0, 0))
+
+        if victoria:
+            texto = fuente_grande.render("¡VICTORIA!", True, (0, 255, 0))
+        else:
+            texto = fuente_grande.render("GAME OVER", True, (255, 0, 0))
+
+        texto_rect = texto.get_rect(center=(400, 250))
+        pantalla.blit(texto, texto_rect)
+
+        # Instrucción para reiniciar
+        texto_r = fuente_grande.render("Presiona R para reiniciar", True, (255, 255, 255))
+        texto_r_rect = texto_r.get_rect(center=(400, 330))
+        pantalla.blit(texto_r, texto_r_rect)
+    ## FIN FASE 7
