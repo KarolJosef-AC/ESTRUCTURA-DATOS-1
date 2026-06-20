@@ -1,7 +1,7 @@
 """
 Vista del juego. Solo dibuja, no piensa.
 
-Fase: 8 - Menú, panel de defensas con oro.
+Fase: 11 - Mejora visual de entidades.
 """
 
 import pygame
@@ -58,37 +58,49 @@ class Render:
 
     def _fogata(self, pantalla, fogata):
         x = fogata.col * TAM_CELDA
-        y = fogata.fila * TAM_CELDA +70
-
+        y = fogata.fila * TAM_CELDA + 70
         w = fogata.ancho * TAM_CELDA
         h = fogata.alto * TAM_CELDA
-        rect_cuerpo = pygame.Rect(x, y, w, h)
-        pygame.draw.rect(pantalla, COLOR_FOGATA, rect_cuerpo)
-        margen = 8
-        rect_brasa = pygame.Rect(x + margen, y + margen, w - margen * 2, h - margen * 2)
-        pygame.draw.rect(pantalla, COLOR_BRASA, rect_brasa)
-        pygame.draw.rect(pantalla, COLOR_BORDE, rect_cuerpo, width=2)
+
+        base = pygame.Rect(x + 5, y + h - 15, w - 10, 15)
+        pygame.draw.rect(pantalla, (101, 67, 33), base)
+        pygame.draw.rect(pantalla, (80, 50, 20), base, 2)
+
+        cx = x + w // 2
+        cy = y + h // 2 - 5
+        pygame.draw.circle(pantalla, (255, 100, 0), (cx, cy), 22)
+        pygame.draw.circle(pantalla, (255, 180, 0), (cx - 3, cy - 5), 16)
+        pygame.draw.circle(pantalla, (255, 255, 100), (cx + 2, cy - 10), 8)
+
         bx = x
-        by = y - 10
+        by = y - 14
         bw = w
-        bh = 6
+        bh = 8
         pygame.draw.rect(pantalla, ROJO, (bx, by, bw, bh))
         vida_ancho = int(bw * fogata.porcentaje_vida())
         pygame.draw.rect(pantalla, VERDE, (bx, by, vida_ancho, bh))
 
     def _enemigos(self, pantalla, enemigos):
         for enemigo in enemigos:
-            x = enemigo.col * TAM_CELDA
-            y = int(enemigo.y) + 70
+            x = enemigo.col * TAM_CELDA + TAM_CELDA // 2
+            y = int(enemigo.y) + 70 + TAM_CELDA // 2
 
-            w = TAM_CELDA
-            h = TAM_CELDA
-            rect = pygame.Rect(x, y, w, h)
-            pygame.draw.rect(pantalla, enemigo.color, rect)
-            bx = x
-            by = y - 6
-            bw = w
-            bh = 4
+            if enemigo.tipo == "normal":
+                pygame.draw.circle(pantalla, enemigo.color, (x, y), 16)
+                pygame.draw.circle(pantalla, (255, 255, 255), (x - 5, y - 4), 5)
+                pygame.draw.circle(pantalla, (255, 255, 255), (x + 5, y - 4), 5)
+                pygame.draw.circle(pantalla, (0, 0, 0), (x - 5, y - 4), 2)
+                pygame.draw.circle(pantalla, (0, 0, 0), (x + 5, y - 4), 2)
+            elif enemigo.tipo == "tanque":
+                rect = pygame.Rect(x - 16, y - 16, 32, 32)
+                pygame.draw.rect(pantalla, enemigo.color, rect, border_radius=6)
+                pygame.draw.circle(pantalla, (255, 255, 0), (x - 6, y - 5), 4)
+                pygame.draw.circle(pantalla, (255, 255, 0), (x + 6, y - 5), 4)
+
+            bx = x - 16
+            by = y - 24
+            bw = 32
+            bh = 5
             pygame.draw.rect(pantalla, ROJO, (bx, by, bw, bh))
             vida_w = int(bw * enemigo.porcentaje_vida())
             pygame.draw.rect(pantalla, VERDE, (bx, by, vida_w, bh))
@@ -98,22 +110,52 @@ class Render:
             x = d.col * TAM_CELDA
             y = d.fila * TAM_CELDA + 70
 
-            rect = pygame.Rect(x, y, TAM_CELDA, TAM_CELDA)
-            pygame.draw.rect(pantalla, d.color, rect)
-            pygame.draw.rect(pantalla, (0, 0, 0), rect, 2)
+            if d.tipo == "valla":
+                for i in range(4):
+                    px = x + 5 + i * 10
+                    pygame.draw.line(pantalla, d.color, (px, y + 5), (px, y + 35), 3)
+                pygame.draw.line(pantalla, d.color, (x + 2, y + 12), (x + 38, y + 12), 3)
+                pygame.draw.line(pantalla, d.color, (x + 2, y + 28), (x + 38, y + 28), 3)
+
+            elif d.tipo == "torre":
+                cx = x + 20
+                cy = y + 20
+                pygame.draw.circle(pantalla, (101, 67, 33), (cx, cy), 16)
+                pygame.draw.circle(pantalla, (80, 50, 20), (cx, cy), 16, 2)
+                pygame.draw.circle(pantalla, (218, 165, 32), (cx, cy), 11)
+                pygame.draw.circle(pantalla, (184, 134, 11), (cx, cy), 11, 2)
+                pygame.draw.line(pantalla, (184, 134, 11), (cx, cy - 5), (cx, cy - 28), 4)
+                pygame.draw.polygon(pantalla, (255, 215, 0), [
+                    (cx, cy - 35),
+                    (cx - 5, cy - 25),
+                    (cx + 5, cy - 25)
+                ])
+                pygame.draw.arc(pantalla, (139, 90, 43), (cx - 12, cy - 20, 24, 14), 3.14, 6.28, 3)
+
+            elif d.tipo == "muro":
+                pygame.draw.rect(pantalla, d.color, (x + 2, y + 2, 36, 36), border_radius=4)
+                pygame.draw.rect(pantalla, (100, 100, 100), (x + 2, y + 2, 36, 36), 3)
+
+            bx = x + 2
+            by = y - 8
+            bw = 36
+            bh = 5
+            pygame.draw.rect(pantalla, ROJO, (bx, by, bw, bh))
+            vida_w = int(bw * (d.vida / d.vida_max))
+            pygame.draw.rect(pantalla, VERDE, (bx, by, vida_w, bh))
 
     def _proyectiles(self, pantalla, proyectiles):
         for p in proyectiles:
-            pygame.draw.circle(pantalla, (255, 255, 0), (int(p.x), int(p.y)), 4)
+            px = int(p.x)
+            py = int(p.y) + 70
+            pygame.draw.circle(pantalla, (255, 255, 200), (px, py), 5)
+            pygame.draw.circle(pantalla, (255, 255, 0), (px, py), 3)
 
     def _ui(self, pantalla, oleada, puntuacion, oro, tipo_defensa, fuente):
-        """Panel superior con oleada, puntos, oro y defensas disponibles."""
-        # Panel más alto (70 píxeles)
         panel = pygame.Rect(0, 0, 800, 70)
         pygame.draw.rect(pantalla, (15, 15, 25), panel)
         pygame.draw.line(pantalla, (60, 60, 80), (0, 70), (800, 70), 1)
 
-        # Textos arriba
         texto_oleada = fuente.render(f"Oleada: {oleada}", True, (255, 255, 255))
         texto_puntos = fuente.render(f"Pts: {puntuacion}", True, (255, 255, 255))
         texto_oro = fuente.render(f"Oro: {oro}", True, (255, 215, 0))
@@ -121,7 +163,6 @@ class Render:
         pantalla.blit(texto_puntos, (160, 8))
         pantalla.blit(texto_oro, (300, 8))
 
-        # Defensas (más abajo, dentro del panel)
         opciones = [
             ("Valla", (139, 90, 43), 490, Defensa.COSTOS["valla"]),
             ("Torre", (100, 100, 150), 590, Defensa.COSTOS["torre"]),
@@ -129,11 +170,35 @@ class Render:
         ]
         for nombre, color, x, costo in opciones:
             rect = pygame.Rect(x, 12, 36, 36)
-            pygame.draw.rect(pantalla, color, rect)
-            if nombre.lower() == tipo_defensa:
-                pygame.draw.rect(pantalla, (255, 255, 255), rect, 3)
+
+            if nombre == "Valla":
+                vx = x + 2
+                vy = 12
+                for i in range(4):
+                    px = vx + 4 + i * 8
+                    pygame.draw.line(pantalla, (139, 90, 43), (px, vy + 4), (px, vy + 32), 2)
+                pygame.draw.line(pantalla, (139, 90, 43), (vx + 2, vy + 10), (vx + 34, vy + 10), 2)
+                pygame.draw.line(pantalla, (139, 90, 43), (vx + 2, vy + 24), (vx + 34, vy + 24), 2)
+                if nombre.lower() == tipo_defensa:
+                    pygame.draw.rect(pantalla, (255, 255, 255), (x, 12, 36, 36), 2)
+
+            elif nombre == "Torre":
+                cx = x + 18
+                cy = 30
+                pygame.draw.circle(pantalla, (101, 67, 33), (cx, cy), 12)
+                pygame.draw.circle(pantalla, (218, 165, 32), (cx, cy), 8)
+                pygame.draw.line(pantalla, (184, 134, 11), (cx, cy - 4), (cx, cy - 18), 3)
+                pygame.draw.polygon(pantalla, (255, 215, 0), [(cx, cy - 22), (cx - 4, cy - 15), (cx + 4, cy - 15)])
+                if nombre.lower() == tipo_defensa:
+                    pygame.draw.circle(pantalla, (255, 255, 255), (cx, cy), 13, 2)
+
             else:
-                pygame.draw.rect(pantalla, (100, 100, 100), rect, 1)
+                pygame.draw.rect(pantalla, color, rect)
+                if nombre.lower() == tipo_defensa:
+                    pygame.draw.rect(pantalla, (255, 255, 255), rect, 3)
+                else:
+                    pygame.draw.rect(pantalla, (100, 100, 100), rect, 1)
+
             texto_nombre = fuente.render(f"{nombre} ${costo}", True, (200, 200, 200))
             pantalla.blit(texto_nombre, (x, 50))
 
@@ -148,7 +213,7 @@ class Render:
         pantalla.blit(texto_jugar, texto_jugar_rect)
 
     def _pantalla_final(self, pantalla, victoria, fuente_grande):
-        overlay = pygame.Surface((800, 600))
+        overlay = pygame.Surface((800, 670))
         overlay.set_alpha(180)
         overlay.fill((0, 0, 0))
         pantalla.blit(overlay, (0, 0))
@@ -156,12 +221,8 @@ class Render:
             texto = fuente_grande.render("¡VICTORIA!", True, (0, 255, 0))
         else:
             texto = fuente_grande.render("GAME OVER", True, (255, 0, 0))
-        texto_rect = texto.get_rect(center=(400, 250))
+        texto_rect = texto.get_rect(center=(400, 300))
         pantalla.blit(texto, texto_rect)
         texto_r = fuente_grande.render("Presiona R para reiniciar", True, (255, 255, 255))
-        texto_r_rect = texto_r.get_rect(center=(400, 330))
+        texto_r_rect = texto_r.get_rect(center=(400, 370))
         pantalla.blit(texto_r, texto_r_rect)
-
-    def _proyectiles(self, pantalla, proyectiles):
-        for p in proyectiles:
-            pygame.draw.circle(pantalla, (255, 255, 0), (int(p.x), int(p.y) + 70), 4)
