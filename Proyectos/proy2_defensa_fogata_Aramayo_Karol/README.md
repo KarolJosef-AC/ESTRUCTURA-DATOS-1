@@ -47,20 +47,26 @@ de datos, POO y arquitectura MVC en un entorno interactivo.
 - Enemigos activos almacenados en lista enlazada
 - Archivos: `cola.py`, `lista_enlazada.py`
 
-### ⬜ Fase 5 — Construcciones Defensivas *(en desarrollo)*
+### ✅ Fase 5 — Construcciones Defensivas
 - Colocación de defensas con click del mouse
-- Tipos: valla, torre, muro reforzado
+- Tipos: valla, torre, muro
 - Validación de posición en el grid
+- Enemigos bloqueados por defensas
+- Enemigos dañan y destruyen defensas
+- Archivos: `defensa.py`
 
-### ⬜ Fase 6 — Combate
-- Torres disparan proyectiles
-- Proyectiles dañan enemigos
-- Enemigos mueren y desaparecen
+### ✅ Fase 6 — Combate
+- Torres disparan proyectiles automáticamente
+- Proyectiles persiguen al enemigo más cercano
+- Enemigos reciben daño y mueren
+- Archivos: `proyectil.py`
 
-### ⬜ Fase 7 — Interfaz y Pulido
-- UI: oleadas, oro, puntuación
-- Condiciones de victoria/derrota
-- Documentación final
+### ✅ Fase 7 — Interfaz y Fin de Juego
+- Contador de oleadas y puntuación en pantalla
+- Condición de victoria: sobrevivir 5 oleadas
+- Condición de derrota: la fogata se destruye
+- Pantalla de Game Over / Victoria
+- Reinicio con tecla R
 
 ---
 
