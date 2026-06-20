@@ -10,6 +10,14 @@ from model.mapa import CELDA_OBSTACULO
 class Defensa:
     """Una defensa colocada en el grid."""
 
+    ## FASE 8 - Costos de cada defensa
+    COSTOS = {
+    "valla": 20,
+    "torre": 50,
+    "muro": 30
+    }
+    ## FIN FASE 8
+
     def __init__(self, col: int, fila: int, tipo: str = "valla"):
         self.col = col
         self.fila = fila
