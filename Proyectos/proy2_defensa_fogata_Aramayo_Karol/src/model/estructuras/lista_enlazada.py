@@ -67,5 +67,5 @@ class ListaEnlazada:
         return self._tamano
     
     def vacia(self):
-        """ True si tiene nodos"""
+        """True si NO tiene nodos."""
         return self.cabeza is None

@@ -14,8 +14,8 @@ class Enemigo:
         self.tipo = tipo
 
         if tipo == 'normal':
-            self.vida = 30
-            self.vida_max = 30
+            self.vida = 45
+            self.vida_max = 45
             self.velocidad = 0.6
             self.color = (180, 40, 40)
         elif tipo == 'tanque':
@@ -46,10 +46,9 @@ class Enemigo:
                 self.y = self.fila * TAM_CELDA
                 return True
 
-            # Verificar si la celda de abajo esta bloqueada
             if not mapa.libre(self.col, nueva_fila):
                 if self.tipo == 'tanque':
-                    return False # se queda -> controlador maneja daño
+                    return False
                 elif self.tipo == 'normal':
                     for _ in range(2):
                         nueva_col = self.col + self._direccion
@@ -58,11 +57,11 @@ class Enemigo:
                             self.x = self.col * TAM_CELDA
                             return False
                         self._direccion *= -1
-                    if self.fila > 0 and mapa.libre(self.col, self.fila -1):
-                        self.fila -= -1
+                    if self.fila > 0 and mapa.libre(self.col, self.fila - 1):
+                        self.fila -= 1
                         self.y = self.fila * TAM_CELDA
                     return False
-                
+
             self.fila = nueva_fila
             self.y = self.fila * TAM_CELDA
 

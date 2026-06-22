@@ -39,6 +39,6 @@ class Proyectil:
 
     def fuera_de_pantalla(self) -> bool:
         """ True si salio de la pantalla"""
-        return self.x < 0 or self.x > 800 or self.y < 0 or self.y > 600
+        return self.x < 0 or self.x > 800 or self.y < 0 or self.y > 670
     
         

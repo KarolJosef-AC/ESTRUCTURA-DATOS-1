@@ -27,11 +27,12 @@ class Render:
         pass
 
     def dibujar(self, pantalla, mapa, fogata, enemigos, defensas, proyectiles,
-                oleada, puntuacion, oro, tipo_defensa, estado, fuente, fuente_grande):
+                oleada, puntuacion, oro, tipo_defensa, jugador, estado, fuente, 
+                fuente_grande, tabla_hash = None, pausa = False):
         pantalla.fill(FONDO)
 
         if estado == "menu":
-            self._pantalla_menu(pantalla, fuente_grande)
+            self._pantalla_menu(pantalla, fuente_grande, fuente, tabla_hash)
             return
 
         self._grilla(pantalla, mapa)
@@ -39,11 +40,12 @@ class Render:
         self._enemigos(pantalla, enemigos)
         self._defensas(pantalla, defensas)
         self._proyectiles(pantalla, proyectiles)
-        self._ui(pantalla, oleada, puntuacion, oro, tipo_defensa, fuente)
+        self._ui(pantalla, oleada, puntuacion, oro, tipo_defensa, jugador, fuente)
+        if estado == "jugando" and pausa:
+            self._pantalla_pausa(pantalla, fuente_grande)
 
-        if estado in ("fin_victoria", "fin_derrota"):
-            victoria = (estado == "fin_victoria")
-            self._pantalla_final(pantalla, victoria, fuente_grande)
+        if estado == "fin_derrota":
+            self._pantalla_final(pantalla, False, jugador, puntuacion, fuente_grande, fuente)
 
     def _grilla(self, pantalla, mapa):
         for fila in range(mapa.filas):
@@ -151,7 +153,7 @@ class Render:
             pygame.draw.circle(pantalla, (255, 255, 200), (px, py), 5)
             pygame.draw.circle(pantalla, (255, 255, 0), (px, py), 3)
 
-    def _ui(self, pantalla, oleada, puntuacion, oro, tipo_defensa, fuente):
+    def _ui(self, pantalla, oleada, puntuacion, oro, tipo_defensa, jugador, fuente):
         panel = pygame.Rect(0, 0, 800, 70)
         pygame.draw.rect(pantalla, (15, 15, 25), panel)
         pygame.draw.line(pantalla, (60, 60, 80), (0, 70), (800, 70), 1)
@@ -159,15 +161,21 @@ class Render:
         texto_oleada = fuente.render(f"Oleada: {oleada}", True, (255, 255, 255))
         texto_puntos = fuente.render(f"Pts: {puntuacion}", True, (255, 255, 255))
         texto_oro = fuente.render(f"Oro: {oro}", True, (255, 215, 0))
+        ## FASE 12 - Nombre del jugador abajo a la izquierda
+        texto_jugador = fuente.render(f"{jugador}", True, (200, 200, 255))
+        ## FIN FASE 12
         pantalla.blit(texto_oleada, (10, 8))
         pantalla.blit(texto_puntos, (160, 8))
         pantalla.blit(texto_oro, (300, 8))
+        pantalla.blit(texto_jugador, (10, 40))
 
+        ## FASE 12 - Defensas movidas a la derecha
         opciones = [
-            ("Valla", (139, 90, 43), 490, Defensa.COSTOS["valla"]),
-            ("Torre", (100, 100, 150), 590, Defensa.COSTOS["torre"]),
-            ("Muro", (80, 80, 80), 690, Defensa.COSTOS["muro"]),
+            ("Valla", (139, 90, 43), 530, Defensa.COSTOS["valla"]),
+            ("Torre", (100, 100, 150), 620, Defensa.COSTOS["torre"]),
+            ("Muro", (80, 80, 80), 710, Defensa.COSTOS["muro"]),
         ]
+        ## FIN FASE 12
         for nombre, color, x, costo in opciones:
             rect = pygame.Rect(x, 12, 36, 36)
 
@@ -202,27 +210,76 @@ class Render:
             texto_nombre = fuente.render(f"{nombre} ${costo}", True, (200, 200, 200))
             pantalla.blit(texto_nombre, (x, 50))
 
-    def _pantalla_menu(self, pantalla, fuente_grande):
-        titulo = fuente_grande.render("DEFENSA DE LA FOGATA", True, (255, 200, 50))
-        titulo_rect = titulo.get_rect(center=(400, 150))
-        pantalla.blit(titulo, titulo_rect)
-        boton = pygame.Rect(300, 350, 200, 70)
-        pygame.draw.rect(pantalla, (0, 150, 0), boton, border_radius=15)
-        texto_jugar = fuente_grande.render("JUGAR", True, (255, 255, 255))
-        texto_jugar_rect = texto_jugar.get_rect(center=boton.center)
-        pantalla.blit(texto_jugar, texto_jugar_rect)
+    def _pantalla_menu(self, pantalla, fuente_grande, fuente, tabla_hash = None):
+        # Fondo con degradado
+        for i in range(670):
+            color = (15 + i // 10, 10 + i // 15, 25 + i // 8)
+            pygame.draw.line(pantalla, color, (0, i), (800, i))
 
-    def _pantalla_final(self, pantalla, victoria, fuente_grande):
+        # Título con sombra
+        sombra = fuente_grande.render("DEFENSA DE LA FOGATA", True, (0, 0, 0))
+        pantalla.blit(sombra, sombra.get_rect(center=(403, 153)))
+        titulo = fuente_grande.render("DEFENSA DE LA FOGATA", True, (255, 200, 50))
+        pantalla.blit(titulo, titulo.get_rect(center=(400, 150)))
+
+        # Subtítulo
+        subtitulo = fuente.render("Protege la fogata de las criaturas", True, (200, 200, 200))
+        pantalla.blit(subtitulo, subtitulo.get_rect(center=(400, 220)))
+
+        # Instrucciones
+        instrucciones = [
+            "1, 2, 3 = Seleccionar defensa",
+            "Click = Colocar defensa",
+            "R = Reiniciar al terminar",
+        ]
+        for i, texto in enumerate(instrucciones):
+            surf = fuente.render(texto, True, (180, 180, 180))
+            pantalla.blit(surf, surf.get_rect(center=(400, 270 + i * 30)))
+
+        # Botón JUGAR con efecto hover
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        boton = pygame.Rect(300, 420, 200, 70)
+        if boton.collidepoint(mouse_x, mouse_y):
+            pygame.draw.rect(pantalla, (0, 200, 0), boton, border_radius=15)
+        else:
+            pygame.draw.rect(pantalla, (0, 150, 0), boton, border_radius=15)
+        pygame.draw.rect(pantalla, (255, 255, 255), boton, 3, border_radius=15)
+        texto_jugar = fuente_grande.render("JUGAR", True, (255, 255, 255))
+        pantalla.blit(texto_jugar, texto_jugar.get_rect(center=boton.center))
+
+
+    def _pantalla_final(self, pantalla, victoria, jugador, puntuacion, fuente_grande, fuente):
         overlay = pygame.Surface((800, 670))
-        overlay.set_alpha(180)
+        overlay.set_alpha(200)
         overlay.fill((0, 0, 0))
         pantalla.blit(overlay, (0, 0))
+
         if victoria:
             texto = fuente_grande.render("¡VICTORIA!", True, (0, 255, 0))
+            detalle = fuente.render(f"{jugador}, salvaste la fogata", True, (200, 255, 200))
         else:
             texto = fuente_grande.render("GAME OVER", True, (255, 0, 0))
-        texto_rect = texto.get_rect(center=(400, 300))
-        pantalla.blit(texto, texto_rect)
-        texto_r = fuente_grande.render("Presiona R para reiniciar", True, (255, 255, 255))
-        texto_r_rect = texto_r.get_rect(center=(400, 370))
-        pantalla.blit(texto_r, texto_r_rect)
+            detalle = fuente.render(f"{jugador}, la fogata fue destruida", True, (255, 200, 200))
+
+        pantalla.blit(texto, texto.get_rect(center=(400, 250)))
+        pantalla.blit(detalle, detalle.get_rect(center=(400, 310)))
+
+        puntos_texto = fuente.render(f"Puntuacion final: {puntuacion}", True, (255, 255, 0))
+        pantalla.blit(puntos_texto, puntos_texto.get_rect(center=(400, 360)))
+
+        texto_r = fuente.render("Presiona R para reiniciar", True, (255, 255, 255))
+        pantalla.blit(texto_r, texto_r.get_rect(center=(400, 420)))
+
+        ## FASE 12 - Pantalla de pausa
+    def _pantalla_pausa(self, pantalla, fuente_grande):
+        overlay = pygame.Surface((800, 670))
+        overlay.set_alpha(160)
+        overlay.fill((0, 0, 0))
+        pantalla.blit(overlay, (0, 0))
+
+        texto = fuente_grande.render("PAUSA", True, (255, 255, 255))
+        pantalla.blit(texto, texto.get_rect(center=(400, 300)))
+
+        texto_p = fuente_grande.render("Presiona P para continuar", True, (200, 200, 200))
+        pantalla.blit(texto_p, texto_p.get_rect(center=(400, 370)))
+    ## FIN FASE 12

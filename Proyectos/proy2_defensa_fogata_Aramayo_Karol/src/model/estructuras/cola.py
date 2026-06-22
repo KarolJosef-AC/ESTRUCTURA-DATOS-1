@@ -25,12 +25,8 @@ class Cola:
         return self._datos.pop(0)
     
     def frente(self):
-        """ 
-        Devuelve el primer elemento sin sacarlo.
-        Lanza IndexError si esta vacia
-        """
         if self.vacia():
-            return IndentationError("La cola esta vacia.")
+            raise IndexError("La cola esta vacia.")
         return self._datos[0]
     
     def vacia(self):
