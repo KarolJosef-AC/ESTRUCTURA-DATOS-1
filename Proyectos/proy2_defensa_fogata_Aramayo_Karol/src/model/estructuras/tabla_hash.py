@@ -1,7 +1,7 @@
 """
 Tabla Hash manual - Almacena puntuaciones de jugadores.
 
-Fase: 12 - Tabla Hash para registro de jugadores.
+Fase: 12 - Tabla Hash tuplaa registro de jugadores.
 """
 import json
 import os
@@ -14,30 +14,31 @@ class TablaHash:
 
     def __init__(self, tamano=10):
         self.tamano = tamano
-        self.buckets = [[] for _ in range(tamano)]
+        self.contenedor = [[] for _ in range(tamano)]
+        
 
     def _hash(self, clave):
-        """Función hash: suma de valores ASCII de cada carácter."""
+        """Función hash: suma de puntuaciones ASCII de cada carácter."""
         total = 0
         for c in clave:
             total += ord(c)
         return total % self.tamano
 
-    def insertar(self, clave, valor):
+    def insertar(self, clave, puntuacion):
         indice = self._hash(clave)
-        for par in self.buckets[indice]:
-            if par[0] == clave:
-                if valor > par[1]: 
-                    par[1] = valor
+        for tupla in self.contenedor[indice]:
+            if tupla[0] == clave:
+                if puntuacion > tupla[1]: 
+                    tupla[1] = puntuacion
                 return
-        self.buckets[indice].append([clave, valor])
+        self.contenedor[indice].append([clave, puntuacion])
 
     def obtener(self, clave):
         """Devuelve la puntuación de un jugador o None."""
         indice = self._hash(clave)
-        for par in self.buckets[indice]:
-            if par[0] == clave:
-                return par[1]
+        for tupla in self.contenedor[indice]:
+            if tupla[0] == clave:
+                return tupla[1]
         return None
 
     def existe(self, clave):
@@ -47,9 +48,9 @@ class TablaHash:
     def obtener_todas(self):
         """Devuelve todas las puntuaciones como lista de (nombre, puntuacion)."""
         resultado = []
-        for bucket in self.buckets:
-            for par in bucket:
-                resultado.append((par[0], par[1]))
+        for bucket in self.contenedor:
+            for tupla in bucket:
+                resultado.append((tupla[0], tupla[1]))
         resultado.sort(key=lambda x: x[1], reverse=True)
         return resultado
 

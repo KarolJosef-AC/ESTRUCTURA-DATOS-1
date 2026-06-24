@@ -35,4 +35,5 @@ class Fogata:
     def recibir_dano(self, cantidad: int) -> None:
         if cantidad < 0:
             raise ValueError(f"Daño negativo: {cantidad}")
+        
         self.vida = max(0, self.vida - cantidad)

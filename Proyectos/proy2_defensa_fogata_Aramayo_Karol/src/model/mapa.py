@@ -29,6 +29,7 @@ class Mapa:
         """Devuelve que hay en la celda (col, fila)."""
         if not self.dentro(col, fila):
             raise IndexError(f"Fuera del mapa: ({col}, {fila})")
+        
         return self.grilla[fila][col]
 
     def dentro(self, col: int, fila: int) -> bool:
@@ -43,8 +44,10 @@ class Mapa:
         """Cambia el tipo de una celda."""
         if tipo not in {CELDA_LIBRE, CELDA_OBSTACULO, CELDA_FOGATA}:
             raise ValueError(f"Tipo invalido: {tipo}")
+        
         if not self.dentro(col, fila):
             raise IndexError(f"Fuera del mapa: ({col}, {fila})")
+        
         self.grilla[fila][col] = tipo
 
     def marcar_zona(self, col: int, fila: int, ancho: int, alto: int, tipo: int) -> None:

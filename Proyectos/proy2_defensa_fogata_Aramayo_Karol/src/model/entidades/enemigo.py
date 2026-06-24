@@ -16,12 +16,12 @@ class Enemigo:
         if tipo == 'normal':
             self.vida = 45
             self.vida_max = 45
-            self.velocidad = 0.6
+            self.velocidad = 0.8
             self.color = (180, 40, 40)
         elif tipo == 'tanque':
             self.vida = 80
             self.vida_max = 80
-            self.velocidad = 0.3
+            self.velocidad = 0.6
             self.color = (100, 40, 100)
 
         self.x = col * TAM_CELDA

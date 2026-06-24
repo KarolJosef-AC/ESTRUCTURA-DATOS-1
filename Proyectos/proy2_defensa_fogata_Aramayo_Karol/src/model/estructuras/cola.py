@@ -11,9 +11,9 @@ class Cola:
     def __init__(self):
         self._datos = []
 
-    def encolar(self, item):
+    def encolar(self, enemigo):
         """Agrega un elemento al final de la cola."""
-        self._datos.append(item)
+        self._datos.append(enemigo)
 
     def desencolar(self):
         """ 

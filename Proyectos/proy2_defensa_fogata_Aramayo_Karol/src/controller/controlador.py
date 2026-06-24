@@ -1,13 +1,6 @@
 """
 Controlador del juego. Tiene el loop principal.
-
-Fase: 3 - ENEMIGOS
-Fase: 4 - Cola y Lista Enlazada.
-Fase: 5 - Defensas con click.
-Fase: 6 - Combate.
-Fase: 7 - Interfaz y fin de juego.
-Fase: 8 - Menú, oro y panel de defensas.
-Fase: 12 - Tabla Hash y login de jugador.
+Fase: 3 al 12
 """
 
 import pygame
@@ -29,71 +22,76 @@ FPS = 60
 
 
 class Controlador:
-    """Mantiene el juego corriendo. Une la vista y el modelo."""
 
     def __init__(self) -> None:
+        
+        #  PYGAME 
         self.pantalla = pygame.display.set_mode((ANCHO, ALTO))
         pygame.display.set_caption(TITULO)
         self.clock = pygame.time.Clock()
+        
+        #  VIEW 
         self.render = Render()
 
+        #  MODEL 
         self.mapa = Mapa()
         self.fogata = Fogata(self.mapa)
 
-        # FASE 4
+        # = ESTRUCTURAS DE DATOS MANUALES =
         self.cola_oleadas = Cola()
         self.activos = ListaEnlazada()
+        self.tabla_hash = TablaHash()
+        self.tabla_hash.cargar()
+
+        #  TIEMPO 
         self.temporizador = 0.0
-
-        # FASE 5
-        self.defensas = []
-        self.tipo_defensa = "valla"
-
-        # FASE 6
-        self.proyectiles = []
         self.tiempo_juego = 0.0
 
-        # FASE 7
+        #  ENTIDADES 
+        self.defensas = []
+        self.proyectiles = []
+        self.tipo_defensa = "valla"
+
+        #  ESTADO DEL JUEGO 
         self.oleada = 1
         self.puntuacion = 0
+        self.oro = 200
         self.estado = "menu"
+        self.pausa = False
+
+        #  LOGIN 
+        self.jugador = None
+        self.nombre_input = ""
+
+        #  FUENTES 
         self.fuente = pygame.font.Font(None, 28)
         self.fuente_grande = pygame.font.Font(None, 56)
 
-        # FASE 8
-        self.oro = 200
-
-        ## FASE 12 - Tabla hash y login
-        self.tabla_hash = TablaHash()
-        self.tabla_hash.cargar()
-        self.jugador = None
-        self.nombre_input = ""
-        self.pausa = False
-        ## FIN FASE 12
-
-        # Fase 4 - llenar cola
+        #  LLENAR COLA INICIAL 
         for _ in range(10):
             col = random.randint(0, self.mapa.columnas - 1)
             self.cola_oleadas.encolar(Enemigo(col=col, fila=0, tipo="normal"))
 
         self.run = False
 
-    ## FASE 12 - Pantalla de login
+    # PANTALLA DE LOGIN
     def login(self):
-        """Pantalla de login para ingresar nombre."""
         input_activo = True
         while input_activo and self.run:
+            
+            #  LEER TECLAS 
             for e in pygame.event.get():
                 if e.type == pygame.QUIT:
                     self.run = False
                     return
-                    ## FASE 12 - ESC para volver al menú
+
                 if e.type == pygame.KEYDOWN:
                     if e.key == pygame.K_ESCAPE:
                         self.nombre_input = ""
                         self.estado = "menu"
                         input_activo = False
                         return
+                    
                     if e.key == pygame.K_RETURN:
                         if self.nombre_input.strip():
                             self.jugador = self.nombre_input.strip()
@@ -104,42 +102,15 @@ class Controlador:
                         if len(self.nombre_input) < 15:
                             self.nombre_input += e.unicode
 
-            self.pantalla.fill((20, 20, 40))
-            titulo = self.fuente_grande.render("DEFENSA DE LA FOGATA", True, (255, 200, 50))
-            self.pantalla.blit(titulo, titulo.get_rect(center=(400, 130)))
-
-            texto = self.fuente.render("Ingresa tu nombre:", True, (255, 255, 255))
-            self.pantalla.blit(texto, texto.get_rect(center=(400, 250)))
-
-            nombre_surface = self.fuente_grande.render(self.nombre_input + "_", True, (255, 255, 0))
-            self.pantalla.blit(nombre_surface, nombre_surface.get_rect(center=(400, 310)))
-
-            instruccion = self.fuente.render("ENTER = Jugar  |  ESC = Volver", True, (150, 150, 150))
-            self.pantalla.blit(instruccion, instruccion.get_rect(center=(400, 380)))
-
-            if self.tabla_hash.existe(self.nombre_input):
-                puntuacion_anterior = self.tabla_hash.obtener(self.nombre_input)
-                texto_existe = self.fuente.render(
-                    f"Jugador existente - Mejor puntuacion: {puntuacion_anterior}",
-                    True, (100, 255, 100)
-                )
-                self.pantalla.blit(texto_existe, texto_existe.get_rect(center=(400, 440)))
-
-            ## FASE 12 - Mostrar ranking en el login
-            ranking = self.tabla_hash.obtener_todas()
-            if ranking:
-                titulo_rank = self.fuente.render("Top 5 - Mejores puntuaciones:", True, (255, 215, 0))
-                self.pantalla.blit(titulo_rank, titulo_rank.get_rect(center=(400, 490)))
-                for i, (nombre, pts) in enumerate(ranking[:5]):
-                    color = (255, 255, 100) if nombre == self.nombre_input else (180, 180, 180)
-                    texto_rank = self.fuente.render(f"{i+1}. {nombre} - {pts} pts", True, color)
-                    self.pantalla.blit(texto_rank, texto_rank.get_rect(center=(400, 520 + i * 25)))
-            ## FIN FASE 12
+            #  DIBUJAR 
+            self.render.dibujar_login(
+                self.pantalla, self.nombre_input,
+                self.fuente, self.fuente_grande, self.tabla_hash)
 
             pygame.display.flip()
             self.clock.tick(60)
-    ## FIN FASE 12
 
+    # REINICIAR
     def reiniciar(self):
         self.mapa = Mapa()
         self.fogata = Fogata(self.mapa)
@@ -155,18 +126,19 @@ class Controlador:
         self.estado = "jugando"
         self.pausa = False
         self.tipo_defensa = "valla"
-        
 
         for _ in range(10):
             col = random.randint(0, self.mapa.columnas - 1)
             self.cola_oleadas.encolar(Enemigo(col=col, fila=0, tipo="normal"))
 
+    # EVENTOS
     def eventos(self) -> None:
         for e in pygame.event.get():
+            
             if e.type == pygame.QUIT:
                 self.run = False
 
-            # FASE 8 - Menú de inicio
+            # MENÚ 
             if self.estado == "menu":
                 if e.type == pygame.MOUSEBUTTONDOWN:
                     mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -174,18 +146,19 @@ class Controlador:
                         self.estado = "login"
                 return
 
-            # FASE 12 - Login (no procesar más eventos)
+            #  LOGIN 
             if self.estado == "login":
                 return
 
-            # FASE 8 - Fin del juego
+            #  FIN DEL JUEGO 
             if self.estado == "fin_derrota":
                 if e.type == pygame.KEYDOWN and e.key == pygame.K_r:
                     self.reiniciar()
                 return
 
-            # --- Eventos del juego ---
+            #  JUEGO 
             if e.type == pygame.KEYDOWN:
+                
                 if e.key == pygame.K_ESCAPE:
                     self.estado = "menu"
                     return
@@ -195,8 +168,10 @@ class Controlador:
                     self.tipo_defensa = "torre"
                 if e.key == pygame.K_3:
                     self.tipo_defensa = "muro"
+                if e.key == pygame.K_p:
+                    self.pausa = not self.pausa
 
-            # FASE 8 - Colocar defensa con oro
+            # COLOCAR DEFENSA 
             if e.type == pygame.MOUSEBUTTONDOWN:
                 mouse_x, mouse_y = pygame.mouse.get_pos()
                 col = mouse_x // 40
@@ -210,9 +185,7 @@ class Controlador:
                         self.defensas.append(defensa)
                         self.oro -= costo
 
-            if e.type == pygame.KEYDOWN and e.key == pygame.K_p:
-                self.pausa = not self.pausa
-
+    # ACTUALIZAR 
     def _actualizar(self) -> None:
         if self.estado != "jugando" or self.pausa:
             return
@@ -221,25 +194,27 @@ class Controlador:
         self.temporizador += dt
         self.tiempo_juego += dt
 
+        #  Enemigos: Cola -> ListaEnlazada
         if self.temporizador >= 1.5:
             self.temporizador = 0.0
             if not self.cola_oleadas.vacia():
                 enemigo = self.cola_oleadas.desencolar()
                 self.activos.insertar(enemigo)
 
+        #  MOVER ENEMIGOS 
         for enemigo in self.activos.recorrer():
             llego = enemigo.mover(dt, self.mapa)
             if llego:
                 self.fogata.recibir_dano(10)
                 self.activos.eliminar(enemigo)
+
                 if not self.fogata.esta_viva():
                     self.estado = "fin_derrota"
-                    ## FASE 12 - Guardar puntuacion
                     self.tabla_hash.insertar(self.jugador, self.puntuacion)
                     self.tabla_hash.guardar()
-                    ## FIN FASE 12
                     return
 
+        #  TORRES DISPARAN 
         for defensa in self.defensas:
             if defensa.tipo == "torre" and defensa.puede_disparar(self.tiempo_juego):
                 mejor_enemigo = None
@@ -254,17 +229,20 @@ class Controlador:
                 if mejor_enemigo:
                     self.proyectiles.append(Proyectil(defensa.col, defensa.fila, mejor_enemigo))
 
+        #  MOVER PROYECTILES 
         for p in self.proyectiles[:]:
             p.mover(dt)
             if not p.activo or p.fuera_de_pantalla():
                 self.proyectiles.remove(p)
 
+        #  ELIMINAR ENEMIGOS MUERTOS 
         for enemigo in self.activos.recorrer():
             if not enemigo.esta_vivo():
                 self.activos.eliminar(enemigo)
                 self.puntuacion += 10
                 self.oro += 10
 
+        #  ENEMIGOS ATACAN DEFENSAS 
         for enemigo in self.activos.recorrer():
             fila_abajo = enemigo.fila + 1
             if fila_abajo < self.mapa.filas:
@@ -278,6 +256,7 @@ class Controlador:
                                 self.defensas.remove(d)
                             break
 
+        #  NUEVA OLEADA 
         if self.cola_oleadas.vacia() and self.activos.vacia():
             self.oleada += 1
             cantidad = 10 + self.oleada * 2
@@ -286,18 +265,18 @@ class Controlador:
                 tipo = random.choice(["normal", "normal", "tanque"])
                 self.cola_oleadas.encolar(Enemigo(col=col, fila=0, tipo=tipo))
 
-
+    # GAME LOOP PRINCIPAL
     def iniciar(self) -> None:
         self.run = True
         while self.run:
-            # ---- MENÚ ----
+            
+            #  MENÚ 
             while self.run and self.estado == "menu":
                 self.eventos()
                 self.render.dibujar(
                     self.pantalla, self.mapa, self.fogata,
                     [], [], [], 0, 0, 0, "valla", "", "menu",
-                    self.fuente, self.fuente_grande, self.tabla_hash
-                )
+                    self.fuente, self.fuente_grande, self.tabla_hash)
                 pygame.display.flip()
                 self.clock.tick(FPS)
 
@@ -311,68 +290,43 @@ class Controlador:
                     else:
                         self.estado = "menu"
 
-            # ---- JUEGO ----
+            #  JUEGO 
             while self.run and self.estado == "jugando":
                 self.eventos()
                 self._actualizar()
-
                 self.render.dibujar(
-                    self.pantalla,
-                    self.mapa,
-                    self.fogata,
-                    self.activos.recorrer(),
-                    self.defensas,
-                    self.proyectiles,
-                    self.oleada,
-                    self.puntuacion,
-                    self.oro,
-                    self.tipo_defensa,
-                    self.jugador if self.jugador else "",
-                    self.estado,
-                    self.fuente,
-                    self.fuente_grande,
-                    self.tabla_hash,
-                    self.pausa
-                )
+                    self.pantalla, self.mapa, self.fogata,
+                    self.activos.recorrer(), self.defensas, self.proyectiles,
+                    self.oleada, self.puntuacion, self.oro,
+                    self.tipo_defensa, self.jugador if self.jugador else "",
+                    self.estado, self.fuente, self.fuente_grande,
+                    self.tabla_hash, self.pausa)
                 pygame.display.flip()
                 self.clock.tick(FPS)
 
-                # Si presionó ESC, volver al menú
                 if self.estado == "menu":
                     self.reiniciar()
                     self.estado = "menu"
 
-            # ---- FIN DEL JUEGO ----
+            #  FIN DEL JUEGO 
             while self.run and self.estado == "fin_derrota":
                 self.eventos()
                 self.render.dibujar(
-                    self.pantalla,
-                    self.mapa,
-                    self.fogata,
-                    self.activos.recorrer(),
-                    self.defensas,
-                    self.proyectiles,
-                    self.oleada,
-                    self.puntuacion,
-                    self.oro,
-                    self.tipo_defensa,
-                    self.jugador if self.jugador else "",
-                    self.estado,
-                    self.fuente,
-                    self.fuente_grande,
-                    self.tabla_hash,
-                    self.pausa
-                )
+                    self.pantalla, self.mapa, self.fogata,
+                    self.activos.recorrer(), self.defensas, self.proyectiles,
+                    self.oleada, self.puntuacion, self.oro,
+                    self.tipo_defensa, self.jugador if self.jugador else "",
+                    self.estado, self.fuente, self.fuente_grande,
+                    self.tabla_hash, self.pausa)
                 pygame.display.flip()
                 self.clock.tick(FPS)
 
-                # Si presionó R o ESC, volver al menú
                 if self.estado == "jugando":
-                    self.estado = "fin_derrota"  # R ya lo cambió
+                    self.estado = "fin_derrota"
                 elif self.estado == "menu":
-                    break  # ESC lleva al menú
+                    break
 
-            # ---- LOGIN ----
+            #  LOGIN 
             while self.run and self.estado == "login":
                 self.nombre_input = ""
                 self.jugador = None
